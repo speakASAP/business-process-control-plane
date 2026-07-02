@@ -12,6 +12,7 @@ It provides:
 - service capability registry;
 - simulation endpoint;
 - publication lifecycle;
+- local process event outbox;
 - audit-ready metadata;
 - fail-closed contracts for affected services.
 
@@ -19,6 +20,9 @@ It provides:
 
 This service has a JSON-backed local process registry for code validation and
 typed in-memory policy/workflow registries for the Holiday Discount pilot.
+Lifecycle transitions also append `bpcp.process-event.v1` envelopes to a local
+JSON outbox so publication can be validated before the production event bus is
+approved.
 
 The JSON process store is not the final production persistence decision; it
 exists so process lifecycle, validation, audit, editor, policy/workflow, and
@@ -31,6 +35,7 @@ wiring.
 npm install
 npm run verify:contracts
 npm run verify:process-registry
+npm run verify:event-publication
 npm run verify:policy-workflow
 npm run verify:editor
 npm run build
@@ -59,6 +64,9 @@ POST /api/processes/:processId/versions/:version/schedule
 POST /api/processes/:processId/versions/:version/publish
 POST /api/processes/:processId/versions/:version/pause
 POST /api/processes/:processId/versions/:version/retire
+GET  /api/events/outbox
+GET  /api/events/outbox/info
+GET  /api/events/outbox/:processId
 GET  /api/policies
 GET  /api/policies/:policyId/versions/:version
 POST /api/policies/:policyId/versions/:version/validate

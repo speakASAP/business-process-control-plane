@@ -14,10 +14,11 @@ export class HealthController {
         'workflow registry',
         'simulation scenarios',
         'visual process editor',
+        'local process event outbox',
       ],
       missing: [
         'production persistence decision',
-        'event bus runtime',
+        'event bus runtime transport and consumer acknowledgement contract',
         'auth RBAC role mapping',
         'production deployment manifest',
       ],

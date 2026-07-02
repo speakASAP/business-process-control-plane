@@ -1,11 +1,13 @@
 import { Module } from '@nestjs/common';
-import { JsonFileStoreService } from '../storage/json-file-store.service';
+import { EventsModule } from '../events/events.module';
+import { StorageModule } from '../storage/storage.module';
 import { ProcessRegistryController } from './process-registry.controller';
 import { ProcessRegistryService } from './process-registry.service';
 
 @Module({
+  imports: [StorageModule, EventsModule],
   controllers: [ProcessRegistryController],
-  providers: [JsonFileStoreService, ProcessRegistryService],
+  providers: [ProcessRegistryService],
   exports: [ProcessRegistryService],
 })
 export class ProcessRegistryModule {}

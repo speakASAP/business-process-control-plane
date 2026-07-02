@@ -10,6 +10,7 @@ Status: implementation started; code validation passing; deployment blocked by o
 - Holiday Discount seed process.
 - Process lifecycle gates: validate, schedule, publish, pause, retire.
 - Process audit events persisted with process registry state.
+- Local process event outbox persisted with lifecycle publication envelopes.
 - Policy registry with seeded Holiday Discount policy.
 - Workflow registry with seeded Holiday Discount workflows.
 - Capability registry.
@@ -22,6 +23,7 @@ Status: implementation started; code validation passing; deployment blocked by o
 | Lane | Owner | Status | Evidence |
 |---|---|---|---|
 | Process registry and persistence | main orchestrator | complete for code validation | `npm run verify:process-registry` |
+| Process event publication | main orchestrator | complete for local outbox contract | `npm run verify:event-publication` |
 | Policy/workflow schema registry | sub-agent, integrated by main | complete for code validation | `npm run verify:policy-workflow` |
 | Visual editor | sub-agent, integrated by main | complete for code validation | `npm run verify:editor` |
 | Simulation scenarios | sub-agent, integrated by main | complete for code validation | `npm run verify:simulation` |
@@ -30,7 +32,7 @@ Status: implementation started; code validation passing; deployment blocked by o
 ## Blockers
 
 - [MISSING: production persistence decision]
-- [MISSING: event bus runtime contract]
+- [MISSING: event bus transport, topic naming, signing, retry, and consumer ack contract]
 - [MISSING: Auth RBAC roles]
 - [MISSING: production deployment manifest]
 - [MISSING: pricing/cart owner contract]
@@ -47,9 +49,10 @@ owner until cluster/deployment issues are fixed.
 
 - `npm run verify:contracts`
 - `npm run verify:process-registry`
+- `npm run verify:event-publication`
 - `npm run verify:policy-workflow`
 - `npm run verify:editor`
 - `npm run build`
 - `npm run verify:simulation`
 - `npm test`
-- runtime smoke for `/health`, `/api/processes`, `/api/policies`, `/api/workflows`, `/api/simulate`, `/editor`
+- runtime smoke for `/health`, `/api/processes`, `/api/events/outbox/info`, `/api/events/outbox`, `/api/policies`, `/api/workflows`, `/api/simulate`, `/editor`

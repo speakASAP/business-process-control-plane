@@ -21,11 +21,13 @@ and observability.
 ## Feature
 
 `FEAT-BPCP-001`: process registry, policy/workflow contracts, visual editor,
-simulation, publication lifecycle, service capability registry.
+simulation, publication lifecycle, local process-event outbox, service
+capability registry.
 
 ## Task
 
-`TASK-BPCP-001`: initialize service skeleton and preserve missing runtime facts.
+`TASK-BPCP-001`: initialize service skeleton, wire local lifecycle publication,
+and preserve missing runtime facts.
 
 ## Execution Plan
 
@@ -35,7 +37,8 @@ simulation, publication lifecycle, service capability registry.
 4. Add visual editor skeleton.
 5. Add simulation endpoint.
 6. Add validation script.
-7. Block production deploy until runtime contracts are resolved.
+7. Add local process-event outbox for lifecycle publication validation.
+8. Block production deploy until runtime contracts are resolved.
 
 ## Coding Prompt
 
@@ -46,7 +49,9 @@ versions.
 
 ## Code
 
-Initial skeleton exists under `src/`.
+Initial skeleton exists under `src/`. Lifecycle transitions append
+`bpcp.process-event.v1` envelopes to the local JSON outbox while production
+transport remains blocked.
 
 ## Validation
 
@@ -54,7 +59,9 @@ Run:
 
 ```bash
 npm run verify:contracts
+npm run verify:event-publication
 npm run build
 ```
 
 [MISSING: production deployment readiness validation]
+[MISSING: event bus transport, topic naming, signing, retry, and consumer ack contract]

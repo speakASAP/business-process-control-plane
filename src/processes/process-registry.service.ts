@@ -1,4 +1,6 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { EventPublisherService } from '../events/event-publisher.service';
+import { ProcessEventType } from '../events/process-event.types';
 import { JsonFileStoreService } from '../storage/json-file-store.service';
 import { CreateProcessDto } from './dto/create-process.dto';
 import {
@@ -12,13 +14,24 @@ import {
 } from './process.types';
 
 const STORE_FILE = 'processes.json';
+const EVENT_TYPE_BY_AUDIT_ACTION: Partial<Record<ProcessAuditAction, ProcessEventType>> = {
+  created: 'process.created',
+  validated: 'process.validated',
+  scheduled: 'process.scheduled',
+  published: 'process.published',
+  paused: 'process.paused',
+  retired: 'process.retired',
+};
 
 @Injectable()
 export class ProcessRegistryService {
   private readonly processes = new Map<string, BusinessProcessDefinition>();
   private readonly auditEvents: ProcessAuditEvent[] = [];
 
-  constructor(private readonly store: JsonFileStoreService) {
+  constructor(
+    private readonly store: JsonFileStoreService,
+    private readonly eventPublisher: EventPublisherService,
+  ) {
     this.loadFromStore();
     if (!this.processes.has(this.key('holiday-discount-2026', 1))) {
       this.seedHolidayDiscount();
@@ -55,10 +68,12 @@ export class ProcessRegistryService {
     };
 
     this.processes.set(key, process);
-    this.appendAudit('created', process, {
+    const details = {
       source: 'api',
       warnings: ['[MISSING: authenticated actor propagation]'],
-    });
+    };
+    this.appendAudit('created', process, details);
+    this.publishProcessEvent('created', process, details);
     this.persist();
     return process;
   }
@@ -96,11 +111,13 @@ export class ProcessRegistryService {
     };
 
     this.processes.set(this.key(processId, version), updated);
-    this.appendAudit('validated', updated, {
+    const details = {
       valid: validation.valid,
       failCount: findings.filter((finding) => finding.severity === 'fail').length,
       warningCount: findings.filter((finding) => finding.severity === 'warning').length,
-    });
+    };
+    this.appendAudit('validated', updated, details);
+    this.publishProcessEvent('validated', updated, details);
     this.persist();
     return validation;
   }
@@ -152,7 +169,10 @@ export class ProcessRegistryService {
       storeFile: STORE_FILE,
       processCount: this.processes.size,
       auditEventCount: this.auditEvents.length,
-      warnings: ['JSON file storage is acceptable for local/code validation, not final production persistence.'],
+      warnings: [
+        'JSON file storage is acceptable for local/code validation, not final production persistence.',
+        'Process lifecycle events are durable in the local outbox, but production transport is not approved.',
+      ],
     };
   }
 
@@ -171,6 +191,7 @@ export class ProcessRegistryService {
     };
     this.processes.set(this.key(processId, version), updated);
     this.appendAudit(auditAction, updated, details);
+    this.publishProcessEvent(auditAction, updated, details);
     this.persist();
     return updated;
   }
@@ -220,9 +241,14 @@ export class ProcessRegistryService {
       message: '[MISSING: policy/workflow module integration must verify every ref before production publish]',
     });
     findings.push({
-      code: 'EVENT_BUS_MISSING',
+      code: 'LOCAL_EVENT_OUTBOX_CONFIGURED',
+      severity: 'pass',
+      message: 'Process lifecycle transitions append durable process events to the local JSON outbox.',
+    });
+    findings.push({
+      code: 'EVENT_BUS_RUNTIME_MISSING',
       severity: 'warning',
-      message: '[MISSING: event bus publication is not wired; publish remains local registry state]',
+      message: '[MISSING: event bus runtime transport and consumer acknowledgement contract]',
     });
 
     return findings;
@@ -312,6 +338,24 @@ export class ProcessRegistryService {
       action,
       actor: 'system',
       createdAt: new Date().toISOString(),
+      details,
+    });
+  }
+
+  private publishProcessEvent(
+    action: ProcessAuditAction,
+    process: BusinessProcessDefinition,
+    details: Record<string, unknown>,
+  ): void {
+    const type = EVENT_TYPE_BY_AUDIT_ACTION[action];
+    if (!type) {
+      return;
+    }
+
+    this.eventPublisher.publishProcessEvent({
+      type,
+      process,
+      auditAction: action,
       details,
     });
   }
