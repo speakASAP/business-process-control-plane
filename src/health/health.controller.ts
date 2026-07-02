@@ -7,21 +7,22 @@ export class HealthController {
     return {
       ok: true,
       service: 'business-process-control-plane',
-      status: 'implementation-started',
+      status: 'deployed-initial',
       implemented: [
-        'json-backed process registry for code validation',
+        'json-backed process registry backed by Kubernetes PVC',
         'policy registry',
         'workflow registry',
         'simulation scenarios',
         'visual process editor',
         'local process event outbox',
-        'RabbitMQ process event transport adapter disabled by default',
+        'RabbitMQ process event transport adapter controlled by environment',
+        'Kubernetes Deployment, Service, PVC, ConfigMap, and secret wiring',
       ],
       missing: [
-        'production persistence decision',
-        'approved BPCP event consumer bindings and production dispatch enablement',
+        'database persistence decision beyond initial file-backed PVC',
+        'downstream BPCP event consumers and replay/backfill ownership',
         'auth RBAC role mapping',
-        'production deployment manifest',
+        'public process-editor ingress/domain',
       ],
     };
   }
