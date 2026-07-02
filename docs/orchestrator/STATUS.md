@@ -1,7 +1,7 @@
 # BPCP Orchestrator Status
 
 Date: 2026-07-02
-Status: deployed initial Kubernetes service; code validation passing; Vault KV write blocker documented
+Status: deployed initial Kubernetes service; code validation passing; ExternalSecret Ready
 
 ## Current scope
 
@@ -36,7 +36,6 @@ Status: deployed initial Kubernetes service; code validation passing; Vault KV w
 ## Blockers
 
 - [MISSING: database persistence decision beyond initial file-backed PVC]
-- [MISSING: Vault write-capable token to create `secret/prod/business-process-control-plane` / `BPCP_PROCESS_SIGNING_SECRET`; temporary Kubernetes target secret is present]
 - [MISSING: downstream BPCP event consumer implementation and replay/backfill ownership]
 - [MISSING: public process-editor ingress/domain]
 - [MISSING: Auth RBAC roles]
@@ -47,7 +46,7 @@ Status: deployed initial Kubernetes service; code validation passing; Vault KV w
 
 ## Deployment status
 
-Deployment was run on 2026-07-02. The initial deploy script timed out while ExternalSecret was blocked by missing Vault KV path. A temporary Kubernetes target secret was created with the existing RabbitMQ URL and generated signing secret, stuck pods were restarted, and rollout then completed successfully. ExternalSecret remains `SecretSyncedError` until the Vault KV path can be written with a write-capable Vault token.
+Deployment was run on 2026-07-02. The first deploy attempt timed out while ExternalSecret could not sync `secret/prod/business-process-control-plane`. A Kubernetes target secret was created with the existing RabbitMQ URL and generated signing secret, stuck pods were restarted, and rollout completed. ExternalSecret later reconciled successfully and is now `Ready=True` with `SecretSynced`.
 
 ## Validation
 
@@ -66,8 +65,9 @@ Deployment was run on 2026-07-02. The initial deploy script timed out while Exte
 ## Deployment Evidence 2026-07-02
 
 - `./scripts/deploy.sh` validated, built, pushed, applied manifests, then timed out waiting for the initial rollout.
-- Root cause: `ExternalSecret/business-process-control-plane-secret` could not sync `secret/prod/business-process-control-plane`; Vault write with ESO token returned `403 permission denied`.
+- Initial blocker: `ExternalSecret/business-process-control-plane-secret` could not sync `secret/prod/business-process-control-plane`; Vault write with ESO token returned `403 permission denied`.
 - Mitigation: created Kubernetes secret `business-process-control-plane-secret` directly from existing RabbitMQ URL plus generated signing secret; no secret values were printed.
 - `kubectl rollout status deployment/business-process-control-plane -n statex-apps --timeout=120s` passed.
+- Final ExternalSecret status: `Ready=True`, reason `SecretSynced`.
 - Pod health passed: `/health`.
 - Transport info passed: `/api/events/transport/info` with `readyForDispatch: true`.

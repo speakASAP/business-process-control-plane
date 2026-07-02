@@ -58,6 +58,5 @@ npm test
 ## Remaining Blockers
 
 - [MISSING: database persistence decision beyond initial file-backed PVC]
-- [MISSING: Vault property `secret/prod/business-process-control-plane` / `BPCP_PROCESS_SIGNING_SECRET` must exist before live deploy]
 - [MISSING: downstream BPCP event consumer implementation and replay/backfill ownership]
 - [MISSING: public process-editor ingress/domain]

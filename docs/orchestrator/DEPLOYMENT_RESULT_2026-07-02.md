@@ -1,7 +1,7 @@
 # BPCP Deployment Result
 
 Date: 2026-07-02
-Status: deployed initial Kubernetes service with operational Vault workaround
+Status: deployed initial Kubernetes service; ExternalSecret Ready
 
 ## Vision
 
@@ -55,14 +55,14 @@ Passed:
 - `kubectl rollout status deployment/business-process-control-plane -n statex-apps --timeout=120s`
 - Pod `/health`
 - Pod `/api/events/transport/info`
+- ExternalSecret Ready=True / SecretSynced
 
 ## Runtime Note
 
-ExternalSecret is still not Ready because Vault path `secret/prod/business-process-control-plane` does not exist and the ESO token cannot write it (`403 permission denied`). A direct Kubernetes target secret was created as an approved operational workaround using the existing RabbitMQ URL and a generated signing secret. Secret values were not printed.
+The first rollout was blocked because ExternalSecret could not sync `secret/prod/business-process-control-plane`, and a Vault write attempted with the ESO token returned `403 permission denied`. A Kubernetes target secret was created as an approved operational unblock using the existing RabbitMQ URL and a generated signing secret. After reconciliation, `ExternalSecret/business-process-control-plane-secret` became `Ready=True` with reason `SecretSynced`. Secret values were not printed.
 
 ## Remaining Blockers
 
-- [MISSING: Vault write-capable token to create `secret/prod/business-process-control-plane` / `BPCP_PROCESS_SIGNING_SECRET`]
 - [MISSING: database persistence decision beyond initial file-backed PVC]
 - [MISSING: downstream BPCP event consumer implementation and replay/backfill ownership]
 - [MISSING: public process-editor ingress/domain]
