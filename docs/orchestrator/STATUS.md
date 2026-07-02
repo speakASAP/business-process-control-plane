@@ -110,3 +110,35 @@ Remaining blockers:
 - `[MISSING: operator-approved replay endpoint runbook and durable replay audit policy]`
 - `[MISSING: final orders.applied-discounts.v1 snapshot field contract in orders.create.v1]`
 - `[MISSING: notification template provider contract for Holiday Discount template refs]`
+
+## Runtime Evidence 2026-07-03 - Holiday Discount Canary Version 2
+
+Status: active canary process version created and published for non-mutating downstream quote validation.
+
+Intent Preservation Chain:
+
+- Vision: Business process changes should activate downstream behavior through control-plane process versions rather than per-service code edits.
+- Goal Impact: Holiday Discount now has a currently active process version that can be validated through Catalog and FlipFlop without creating orders or payments.
+- System: BPCP owns process lifecycle, Catalog owns product eligibility facts/projection, and FlipFlop owns quote/checkout calculation.
+- Feature: Active Holiday Discount canary version 2.
+- Task: Create, validate, publish, and dispatch process version 2 with an active window for canary quote smoke.
+- Execution Plan: Use BPCP API in the deployed pod, keep existing policy/workflow refs, dispatch the outbox, then validate Catalog projection and FlipFlop quote behavior.
+- Coding Prompt: Do not mutate orders, payments, reservations, or product data; record unresolved rollout contracts as `[MISSING: ...]`.
+- Code: runtime configuration through BPCP process registry; no BPCP source change required in this lane.
+- Validation: process validation, publish/outbox dispatch, Catalog eligibility facts, and FlipFlop public quote smoke passed.
+
+Runtime evidence:
+
+- Created `holiday-discount-2026` version `2` with active window `2026-07-02T00:00:00Z` to `2026-07-10T23:59:59Z`.
+- BPCP validation returned `valid=true` with expected warnings for pending policy/workflow registry production wiring and event bus enablement gaps.
+- Published version `2`; outbox dispatch attempted `4` and dispatched `4`, including `holiday-discount-2026:2:process.published:7` on routing key `bpcp.process.published.v1`.
+- Catalog projected version `2`: canary Catalog product `ce4a51aa-2d12-4ab7-a965-7a36609d01fc` returned `eligible=true`, matched tag `allegro-offer:18106037370`, and blockers `[]`.
+- Catalog projected version `2`: non-canary Catalog product `dbc51dde-fc66-4511-b178-f929183f4647` returned `eligible=false`, matched tags `[]`, and reason `PRODUCT_NOT_IN_HOLIDAY_ELIGIBILITY_SET`.
+- FlipFlop public quote smoke for the canary product returned `holidayDiscount.applied=true`, `discount=99.9`, and `sideEffects=[]`.
+- FlipFlop public quote smoke for the non-canary product returned `holidayDiscount.applied=false`, `discount=0`, and `sideEffects=[]`.
+
+Remaining blockers:
+
+- `[MISSING: operator-approved paid checkout rollout gate for Holiday Discount]`.
+- `[MISSING: final orders.applied-discounts.v1 snapshot field contract in orders.create.v1]`.
+- `[MISSING: notification template provider contract for Holiday Discount post-purchase messages]`.
