@@ -103,14 +103,38 @@ export class EventPublisherService {
   }
 
   async dispatchPending(limit = 100): Promise<ProcessEventDispatchSummary> {
-    const transportInfo = this.transport.getTransportInfo();
     const candidates = this.events
       .filter((event) => event.delivery.state !== 'dispatched')
-      .slice(0, Math.max(1, Math.min(limit, 500)));
+      .slice(0, this.boundedLimit(limit));
+
+    return this.dispatchCandidates('bpcp.process-event-dispatch-summary.v1', candidates, true);
+  }
+
+  async replayDispatched(input: {
+    limit?: number;
+    processId?: string;
+    eventType?: ProcessEventType;
+  } = {}): Promise<ProcessEventDispatchSummary> {
+    const candidates = this.events
+      .filter((event) => event.delivery.state === 'dispatched')
+      .filter((event) => !input.processId || event.processId === input.processId)
+      .filter((event) => !input.eventType || event.type === input.eventType)
+      .sort((a, b) => a.occurredAt.localeCompare(b.occurredAt))
+      .slice(0, this.boundedLimit(input.limit ?? 100));
+
+    return this.dispatchCandidates('bpcp.process-event-replay-summary.v1', candidates, false);
+  }
+
+  private async dispatchCandidates(
+    schemaVersion: ProcessEventDispatchSummary['schemaVersion'],
+    candidates: ProcessEventEnvelope[],
+    mutateDelivery: boolean,
+  ): Promise<ProcessEventDispatchSummary> {
+    const transportInfo = this.transport.getTransportInfo();
 
     if (!transportInfo.readyForDispatch) {
       return {
-        schemaVersion: 'bpcp.process-event-dispatch-summary.v1',
+        schemaVersion,
         attempted: 0,
         dispatched: 0,
         failed: 0,
@@ -123,13 +147,18 @@ export class EventPublisherService {
     const results: ProcessEventDispatchResult[] = [];
     for (const event of candidates) {
       const result = await this.transport.dispatch(event);
-      this.applyDispatchResult(event, result);
+      if (mutateDelivery) {
+        this.applyDispatchResult(event, result);
+      }
       results.push(result);
     }
 
-    this.persist();
+    if (mutateDelivery) {
+      this.persist();
+    }
+
     return {
-      schemaVersion: 'bpcp.process-event-dispatch-summary.v1',
+      schemaVersion,
       attempted: results.length,
       dispatched: results.filter((result) => result.state === 'dispatched').length,
       failed: results.filter((result) => result.state === 'failed').length,
@@ -137,6 +166,10 @@ export class EventPublisherService {
       blockers: [],
       results,
     };
+  }
+
+  private boundedLimit(limit: number): number {
+    return Math.max(1, Math.min(limit, 500));
   }
 
   private loadFromStore(): void {

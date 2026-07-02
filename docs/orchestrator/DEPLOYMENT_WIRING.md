@@ -60,3 +60,9 @@ npm test
 - [MISSING: database persistence decision beyond initial file-backed PVC]
 - [MISSING: downstream BPCP event consumer implementation and replay/backfill ownership]
 - [MISSING: public process-editor ingress/domain]
+
+## Replay and lifecycle hardening v1
+
+BPCP now exposes a bounded source-level replay endpoint for already-dispatched events: `POST /api/events/outbox/replay`. Operators must keep replay bounded with `limit`, and may scope by `processId` and `eventType`. Downstream consumers must bind lifecycle rollback events (`published`, `paused`, `retired`) instead of copying a published-only subscription.
+
+Remaining blocker: [MISSING: operator-approved replay endpoint runbook and durable replay audit policy].

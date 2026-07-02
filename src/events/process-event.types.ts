@@ -89,7 +89,7 @@ export interface ProcessEventDispatchResult {
 }
 
 export interface ProcessEventDispatchSummary {
-  schemaVersion: 'bpcp.process-event-dispatch-summary.v1';
+  schemaVersion: 'bpcp.process-event-dispatch-summary.v1' | 'bpcp.process-event-replay-summary.v1';
   attempted: number;
   dispatched: number;
   failed: number;

@@ -21,6 +21,8 @@ const checks = [
   [transport, 'assertExchange(config.exchange,'],
   [transport, 'channel.publish(config.exchange, routingKey'],
   [transport, 'persistent: true'],
+  [transport, 'messageId: event.id'],
+  [transport, 'type: routingKey'],
   [transport, "'x-bpcp-signature'"],
   [transport, "'process.published': `${prefix}.published.v1`"],
   [types, 'ProcessEventTransportInfo'],

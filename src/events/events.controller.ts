@@ -1,5 +1,6 @@
 import { Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { EventPublisherService } from './event-publisher.service';
+import { ProcessEventType } from './process-event.types';
 
 @Controller('api/events')
 export class EventsController {
@@ -18,6 +19,19 @@ export class EventsController {
   @Post('outbox/dispatch')
   dispatchOutbox(@Query('limit') limit?: string) {
     return this.eventPublisher.dispatchPending(limit ? Number.parseInt(limit, 10) : undefined);
+  }
+
+  @Post('outbox/replay')
+  replayOutbox(
+    @Query('limit') limit?: string,
+    @Query('processId') processId?: string,
+    @Query('eventType') eventType?: ProcessEventType,
+  ) {
+    return this.eventPublisher.replayDispatched({
+      limit: limit ? Number.parseInt(limit, 10) : undefined,
+      processId,
+      eventType,
+    });
   }
 
   @Get('outbox/:processId')

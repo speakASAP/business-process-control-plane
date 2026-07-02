@@ -63,6 +63,8 @@ export class RabbitMqProcessEventTransportService {
       const accepted = channel.publish(config.exchange, routingKey, body, {
         contentType: 'application/json',
         persistent: true,
+        messageId: event.id,
+        type: routingKey,
         headers: {
           eventType: routingKey,
           schemaVersion: event.schemaVersion,

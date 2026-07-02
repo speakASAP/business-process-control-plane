@@ -41,13 +41,14 @@ Current endpoints:
 GET /api/events/outbox
 GET /api/events/outbox/info
 POST /api/events/outbox/dispatch
+POST /api/events/outbox/replay?limit=100&processId=<processId>&eventType=process.published
 GET /api/events/outbox/:processId
 GET /api/events/transport/info
 ```
 
 The RabbitMQ adapter follows the verified Alfares pattern used by Orders,
 Marketing, Leads, and Invoices: topic exchange, durable exchange assertion,
-versioned routing keys, persistent JSON messages, and env-gated enablement.
+versioned routing keys, persistent JSON messages with `messageId=event.id` and `type=<routingKey>`, and env-gated enablement.
 
 Default BPCP publication contract:
 
@@ -69,3 +70,9 @@ Dispatch is enabled in `k8s/configmap.yaml` after owner approval. `BPCP_EVENT_BU
 - audit log client;
 - service adapter executor;
 - RBAC integration.
+
+## Replay and lifecycle hardening v1
+
+BPCP now exposes a bounded source-level replay endpoint for already-dispatched events: `POST /api/events/outbox/replay`. Operators must keep replay bounded with `limit`, and may scope by `processId` and `eventType`. Downstream consumers must bind lifecycle rollback events (`published`, `paused`, `retired`) instead of copying a published-only subscription.
+
+Remaining blocker: [MISSING: operator-approved replay endpoint runbook and durable replay audit policy].
