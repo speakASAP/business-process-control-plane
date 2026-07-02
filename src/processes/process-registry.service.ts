@@ -246,9 +246,9 @@ export class ProcessRegistryService {
       message: 'Process lifecycle transitions append durable process events to the local JSON outbox.',
     });
     findings.push({
-      code: 'EVENT_BUS_RUNTIME_MISSING',
+      code: 'EVENT_BUS_PRODUCTION_ENABLEMENT_MISSING',
       severity: 'warning',
-      message: '[MISSING: event bus runtime transport and consumer acknowledgement contract]',
+      message: '[MISSING: BPCP event dispatch enablement, signing secret, and approved consumer bindings]',
     });
 
     return findings;
