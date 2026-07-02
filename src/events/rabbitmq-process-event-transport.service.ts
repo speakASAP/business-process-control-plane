@@ -51,7 +51,7 @@ export class RabbitMqProcessEventTransportService {
       };
     }
 
-    let connection: amqp.Connection | undefined;
+    let connection: amqp.ChannelModel | undefined;
     let channel: amqp.Channel | undefined;
     try {
       connection = await this.withTimeout(amqp.connect(config.url), config.publishTimeoutMs);
