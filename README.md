@@ -40,6 +40,7 @@ npm run verify:contracts
 npm run verify:process-registry
 npm run verify:event-publication
 npm run verify:event-transport
+npm run verify:deployment-wiring
 npm run verify:policy-workflow
 npm run verify:editor
 npm run build
@@ -90,5 +91,4 @@ domain-service databases and does not own monetary finality.
 
 ## Deployment
 
-Deployment is intentionally blocked until Kubernetes, ingress, service identity,
-event bus, and production persistence are approved.
+Kubernetes deployment wiring exists under `k8s/` with ConfigMap, ExternalSecret, PVC, Deployment, and Service manifests. `scripts/deploy.sh` validates, builds, pushes, applies manifests, waits for rollout, and checks `/health` plus `/api/events/transport/info`. No ingress is included yet; public editor/domain approval remains pending. JSON persistence is backed by a PVC for initial deployment, while the final database/HA persistence decision remains pending.

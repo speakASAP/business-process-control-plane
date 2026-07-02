@@ -33,9 +33,9 @@ Mark unresolved facts as `[MISSING: ...]` or `[UNKNOWN: ...]`.
 
 ## Current blockers
 
-- [MISSING: GitHub origin URL]
-- [MISSING: production deployment manifest]
-- [MISSING: database persistence decision]
-- [MISSING: event bus runtime URL and exchange/queue names]
+- [MISSING: database persistence decision beyond initial file-backed PVC]
+- BPCP event producer wiring approved: RabbitMQ URL from `secret/prod/runlayer`, exchange `bpcp.events`, routing prefix `bpcp.process`.
+- [MISSING: downstream BPCP event consumers and replay/backfill ownership]
 - [MISSING: exact Auth RBAC roles]
+- [MISSING: public process-editor ingress/domain]
 - [MISSING: authoritative pricing/cart owner contract]

@@ -19,6 +19,7 @@ The central cross-service contract pack lives in:
 | `simulation` | Deterministic Holiday Discount simulation endpoint |
 | `editor` | Built-in visual process editor skeleton |
 | `health` | Service health and missing runtime facts |
+| `k8s` | Initial Kubernetes deployment wiring with ConfigMap, ExternalSecret, PVC, Deployment, and Service |
 
 ## Runtime persistence
 
@@ -26,8 +27,7 @@ The process registry persists to `BPCP_DATA_DIR/processes.json`.
 The process event outbox persists to `BPCP_DATA_DIR/process-event-outbox.json`.
 Default `BPCP_DATA_DIR` is `<repo>/data`, and `data/` is ignored by Git.
 
-This is a development persistence layer only. Production still requires an
-approved database/persistence decision.
+This is the current file-backed persistence layer. The Kubernetes manifest mounts `/var/lib/bpcp` from `business-process-control-plane-data` PVC for initial deployment durability. Final database/HA persistence remains `[MISSING: database persistence decision beyond initial file-backed PVC]`.
 
 ## Process event publication
 
@@ -62,10 +62,7 @@ routing keys:
   bpcp.process.retired.v1
 ```
 
-Dispatch remains fail-closed until `BPCP_EVENT_BUS_ENABLED=true`,
-`BPCP_EVENT_BUS_URL` or `RABBITMQ_URL`, and `BPCP_PROCESS_SIGNING_SECRET` are
-configured. Consumer queue bindings and production replay policy are still
-deployment blockers.
+Dispatch is enabled in `k8s/configmap.yaml` after owner approval. `BPCP_EVENT_BUS_URL` and `RABBITMQ_URL` are sourced from Vault key `secret/prod/runlayer` property `RABBITMQ_URL`; `BPCP_PROCESS_SIGNING_SECRET` is sourced from `secret/prod/business-process-control-plane`. Downstream consumer queues and replay/backfill ownership remain service-owned.
 
 ## Future modules
 

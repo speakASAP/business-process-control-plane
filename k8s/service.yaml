@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: business-process-control-plane
+  namespace: statex-apps
+  labels:
+    app: business-process-control-plane
+    managed-by: codex
+spec:
+  type: ClusterIP
+  selector:
+    app: business-process-control-plane
+  ports:
+    - protocol: TCP
+      port: 3375
+      targetPort: 3375
+      name: http
