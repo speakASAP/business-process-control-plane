@@ -1,5 +1,14 @@
 export type ProcessStatus = 'draft' | 'validated' | 'scheduled' | 'active' | 'paused' | 'retired';
 
+export type ProcessAuditAction =
+  | 'created'
+  | 'validated'
+  | 'scheduled'
+  | 'published'
+  | 'paused'
+  | 'retired'
+  | 'seeded';
+
 export interface BusinessProcessDefinition {
   schemaVersion: 'bpcp.process.v1';
   processId: string;
@@ -13,6 +22,7 @@ export interface BusinessProcessDefinition {
   killSwitch: boolean;
   createdAt: string;
   updatedAt: string;
+  lastValidation?: ProcessValidationResult;
 }
 
 export interface ValidationFinding {
@@ -25,5 +35,23 @@ export interface ProcessValidationResult {
   processId: string;
   version: number;
   valid: boolean;
+  validatedAt: string;
   findings: ValidationFinding[];
+}
+
+export interface ProcessAuditEvent {
+  schemaVersion: 'bpcp.process-audit.v1';
+  id: string;
+  processId: string;
+  version: number;
+  action: ProcessAuditAction;
+  actor: string;
+  createdAt: string;
+  details: Record<string, unknown>;
+}
+
+export interface ProcessStoreSnapshot {
+  schemaVersion: 'bpcp.process-store.v1';
+  processes: BusinessProcessDefinition[];
+  auditEvents: ProcessAuditEvent[];
 }

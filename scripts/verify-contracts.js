@@ -8,6 +8,7 @@ const required = [
   'package.json',
   'src/main.ts',
   'src/app.module.ts',
+  'src/storage/json-file-store.service.ts',
   'src/processes/process-registry.controller.ts',
   'src/capabilities/capability-registry.controller.ts',
   'src/simulation/simulation.controller.ts',
@@ -38,4 +39,12 @@ for (const marker of ['drag', 'canvas', 'holiday-discount-2026', 'api/simulate']
   }
 }
 
-console.log('BPCP skeleton contract verification passed.');
+const processController = fs.readFileSync(path.join(root, 'src/processes/process-registry.controller.ts'), 'utf8');
+for (const marker of ['store/info', '/schedule', '/retire', '/audit']) {
+  if (!processController.includes(marker)) {
+    console.error(`Process controller missing marker: ${marker}`);
+    process.exit(1);
+  }
+}
+
+console.log('BPCP contract verification passed.');

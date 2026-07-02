@@ -9,8 +9,9 @@
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:prod": "node dist/main",
-    "test": "npm run verify:contracts && npm run build",
-    "verify:contracts": "node scripts/verify-contracts.js"
+    "test": "npm run verify:contracts && npm run verify:process-registry && npm run build",
+    "verify:contracts": "node scripts/verify-contracts.js",
+    "verify:process-registry": "node scripts/verify-process-registry.js"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",

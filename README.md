@@ -17,15 +17,18 @@ It provides:
 
 ## Current state
 
-This is an initial skeleton. It intentionally keeps runtime persistence in
-memory until the storage and event-bus contracts are approved.
+This service now has a JSON-backed local process registry for code validation.
+The JSON store is not the final production persistence decision; it exists so
+process lifecycle, validation, audit, and editor flows can be developed without
+waiting for Kubernetes or database wiring.
 
 ## Local commands
 
 ```bash
 npm install
-npm run build
 npm run verify:contracts
+npm run verify:process-registry
+npm run build
 npm test
 npm run start:dev
 ```
@@ -41,9 +44,15 @@ GET  /health
 GET  /editor
 GET  /api/processes
 POST /api/processes
+GET  /api/processes/store/info
+GET  /api/processes/:processId/audit
+GET  /api/processes/:processId/versions/:version
+GET  /api/processes/:processId/versions/:version/audit
 POST /api/processes/:processId/versions/:version/validate
+POST /api/processes/:processId/versions/:version/schedule
 POST /api/processes/:processId/versions/:version/publish
 POST /api/processes/:processId/versions/:version/pause
+POST /api/processes/:processId/versions/:version/retire
 GET  /api/capabilities
 POST /api/simulate
 ```
@@ -52,3 +61,8 @@ POST /api/simulate
 
 BPCP coordinates business process versions. It does not directly mutate
 domain-service databases and does not own monetary finality.
+
+## Deployment
+
+Deployment is intentionally blocked until Kubernetes, ingress, service identity,
+event bus, and production persistence are approved.

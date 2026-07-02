@@ -16,9 +16,27 @@ export class ProcessRegistryController {
     return this.processRegistry.createProcess(dto);
   }
 
+  @Get('store/info')
+  getStoreInfo() {
+    return this.processRegistry.getStoreInfo();
+  }
+
+  @Get(':processId/audit')
+  getProcessAudit(@Param('processId') processId: string) {
+    return this.processRegistry.getAudit(processId);
+  }
+
   @Get(':processId/versions/:version')
   getProcess(@Param('processId') processId: string, @Param('version', ParseIntPipe) version: number) {
     return this.processRegistry.getProcess(processId, version);
+  }
+
+  @Get(':processId/versions/:version/audit')
+  getProcessVersionAudit(
+    @Param('processId') processId: string,
+    @Param('version', ParseIntPipe) version: number,
+  ) {
+    return this.processRegistry.getAudit(processId, version);
   }
 
   @Post(':processId/versions/:version/validate')
@@ -26,19 +44,20 @@ export class ProcessRegistryController {
     return this.processRegistry.validateProcess(processId, version);
   }
 
+  @Post(':processId/versions/:version/schedule')
+  scheduleProcess(@Param('processId') processId: string, @Param('version', ParseIntPipe) version: number) {
+    return {
+      status: 'scheduled-in-registry',
+      process: this.processRegistry.scheduleProcess(processId, version),
+      warnings: ['[MISSING: activation scheduler runtime is not wired]'],
+    };
+  }
+
   @Post(':processId/versions/:version/publish')
   publishProcess(@Param('processId') processId: string, @Param('version', ParseIntPipe) version: number) {
-    const validation = this.processRegistry.validateProcess(processId, version);
-    if (!validation.valid) {
-      return {
-        status: 'rejected',
-        validation,
-      };
-    }
-
     return {
-      status: 'published-in-memory',
-      process: this.processRegistry.transition(processId, version, 'active'),
+      status: 'published-in-registry',
+      process: this.processRegistry.publishProcess(processId, version),
       warnings: ['[MISSING: signed publication and event bus broadcast]'],
     };
   }
@@ -46,9 +65,18 @@ export class ProcessRegistryController {
   @Post(':processId/versions/:version/pause')
   pauseProcess(@Param('processId') processId: string, @Param('version', ParseIntPipe) version: number) {
     return {
-      status: 'paused-in-memory',
-      process: this.processRegistry.transition(processId, version, 'paused'),
+      status: 'paused-in-registry',
+      process: this.processRegistry.pauseProcess(processId, version),
       warnings: ['[MISSING: pause event broadcast to service adapters]'],
+    };
+  }
+
+  @Post(':processId/versions/:version/retire')
+  retireProcess(@Param('processId') processId: string, @Param('version', ParseIntPipe) version: number) {
+    return {
+      status: 'retired-in-registry',
+      process: this.processRegistry.retireProcess(processId, version),
+      warnings: ['[MISSING: retirement event broadcast to service adapters]'],
     };
   }
 }
