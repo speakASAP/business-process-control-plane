@@ -14,7 +14,7 @@ The central cross-service contract pack lives in:
 |---|---|
 | `processes` | JSON-backed process registry, lifecycle gates, validation, audit |
 | `storage` | Local JSON file store for code validation before production persistence |
-| `events` | Local durable process-event outbox for lifecycle publication contracts |
+| `events` | Local durable process-event outbox and disabled-by-default RabbitMQ transport |
 | `capabilities` | Initial affected-service capability registry |
 | `simulation` | Deterministic Holiday Discount simulation endpoint |
 | `editor` | Built-in visual process editor skeleton |
@@ -40,17 +40,35 @@ Current endpoints:
 ```text
 GET /api/events/outbox
 GET /api/events/outbox/info
+POST /api/events/outbox/dispatch
 GET /api/events/outbox/:processId
+GET /api/events/transport/info
 ```
 
-The outbox is local and durable enough for code validation. Production dispatch
-is still blocked by `[MISSING: event bus transport, topic naming, signing,
-retry, and consumer ack contract]`.
+The RabbitMQ adapter follows the verified Alfares pattern used by Orders,
+Marketing, Leads, and Invoices: topic exchange, durable exchange assertion,
+versioned routing keys, persistent JSON messages, and env-gated enablement.
+
+Default BPCP publication contract:
+
+```text
+exchange: bpcp.events
+routing keys:
+  bpcp.process.created.v1
+  bpcp.process.validated.v1
+  bpcp.process.scheduled.v1
+  bpcp.process.published.v1
+  bpcp.process.paused.v1
+  bpcp.process.retired.v1
+```
+
+Dispatch remains fail-closed until `BPCP_EVENT_BUS_ENABLED=true`,
+`BPCP_EVENT_BUS_URL` or `RABBITMQ_URL`, and `BPCP_PROCESS_SIGNING_SECRET` are
+configured. Consumer queue bindings and production replay policy are still
+deployment blockers.
 
 ## Future modules
 
-- publication transport adapter;
-- publication signer;
 - audit log client;
 - service adapter executor;
 - RBAC integration.

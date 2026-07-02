@@ -9,6 +9,7 @@ export type ProcessEventType =
   | 'process.retired';
 
 export type ProcessEventDeliveryState = 'pending' | 'dispatched' | 'failed';
+export type ProcessEventDeliveryTransport = 'local-json-outbox' | 'rabbitmq-topic';
 
 export interface ProcessEventLifecyclePayload {
   auditAction: string;
@@ -31,7 +32,13 @@ export interface ProcessEventPayload {
 
 export interface ProcessEventDelivery {
   state: ProcessEventDeliveryState;
-  transport: 'local-json-outbox';
+  transport: ProcessEventDeliveryTransport;
+  attempts: number;
+  exchange?: string;
+  routingKey?: string;
+  lastAttemptAt?: string;
+  dispatchedAt?: string;
+  error?: string;
   missing: string[];
 }
 
@@ -53,4 +60,40 @@ export interface ProcessEventEnvelope {
 export interface ProcessEventOutboxSnapshot {
   schemaVersion: 'bpcp.process-event-outbox.v1';
   events: ProcessEventEnvelope[];
+}
+
+export interface ProcessEventTransportInfo {
+  schemaVersion: 'bpcp.process-event-transport-info.v1';
+  enabled: boolean;
+  transport: 'rabbitmq-topic';
+  exchange: string;
+  routingKeyPrefix: string;
+  urlConfigured: boolean;
+  signingSecretConfigured: boolean;
+  publishTimeoutMs: number;
+  readyForDispatch: boolean;
+  blockers: string[];
+  routingKeys: Record<ProcessEventType, string>;
+}
+
+export interface ProcessEventDispatchResult {
+  schemaVersion: 'bpcp.process-event-dispatch-result.v1';
+  eventId: string;
+  state: 'dispatched' | 'failed' | 'skipped';
+  transport: 'rabbitmq-topic';
+  exchange: string;
+  routingKey: string;
+  attemptedAt: string;
+  error?: string;
+  blockers: string[];
+}
+
+export interface ProcessEventDispatchSummary {
+  schemaVersion: 'bpcp.process-event-dispatch-summary.v1';
+  attempted: number;
+  dispatched: number;
+  failed: number;
+  skipped: number;
+  blockers: string[];
+  results: ProcessEventDispatchResult[];
 }

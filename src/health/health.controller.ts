@@ -15,10 +15,11 @@ export class HealthController {
         'simulation scenarios',
         'visual process editor',
         'local process event outbox',
+        'RabbitMQ process event transport adapter disabled by default',
       ],
       missing: [
         'production persistence decision',
-        'event bus runtime transport and consumer acknowledgement contract',
+        'approved BPCP event consumer bindings and production dispatch enablement',
         'auth RBAC role mapping',
         'production deployment manifest',
       ],

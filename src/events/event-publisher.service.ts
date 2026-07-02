@@ -1,18 +1,28 @@
 import { Injectable } from '@nestjs/common';
 import { BusinessProcessDefinition, ProcessAuditAction } from '../processes/process.types';
 import { JsonFileStoreService } from '../storage/json-file-store.service';
-import { ProcessEventEnvelope, ProcessEventOutboxSnapshot, ProcessEventType } from './process-event.types';
+import { RabbitMqProcessEventTransportService } from './rabbitmq-process-event-transport.service';
+import {
+  ProcessEventDispatchResult,
+  ProcessEventDispatchSummary,
+  ProcessEventEnvelope,
+  ProcessEventOutboxSnapshot,
+  ProcessEventType,
+} from './process-event.types';
 
 const EVENT_STORE_FILE = 'process-event-outbox.json';
 const EVENT_TRANSPORT = 'local-json-outbox';
 const EVENT_BUS_MISSING =
-  '[MISSING: event bus transport, topic naming, signing, retry, and consumer ack contract]';
+  '[MISSING: RabbitMQ dispatch not attempted; use POST /api/events/outbox/dispatch after transport config is approved]';
 
 @Injectable()
 export class EventPublisherService {
   private readonly events: ProcessEventEnvelope[] = [];
 
-  constructor(private readonly store: JsonFileStoreService) {
+  constructor(
+    private readonly store: JsonFileStoreService,
+    private readonly transport: RabbitMqProcessEventTransportService,
+  ) {
     this.loadFromStore();
   }
 
@@ -54,6 +64,7 @@ export class EventPublisherService {
       delivery: {
         state: 'pending',
         transport: EVENT_TRANSPORT,
+        attempts: 0,
         missing: [EVENT_BUS_MISSING],
       },
     };
@@ -70,14 +81,61 @@ export class EventPublisherService {
   }
 
   getOutboxInfo() {
+    const transportInfo = this.transport.getTransportInfo();
+    const counts = this.getStateCounts();
     return {
       schemaVersion: 'bpcp.process-event-outbox-info.v1',
       dataDir: this.store.getDataDir(),
       storeFile: EVENT_STORE_FILE,
       eventCount: this.events.length,
+      pendingCount: counts.pending,
+      dispatchedCount: counts.dispatched,
+      failedCount: counts.failed,
       transport: EVENT_TRANSPORT,
-      readyForProductionDispatch: false,
-      blockers: [EVENT_BUS_MISSING],
+      dispatchTransport: transportInfo,
+      readyForProductionDispatch: transportInfo.readyForDispatch,
+      blockers: transportInfo.blockers,
+    };
+  }
+
+  getTransportInfo() {
+    return this.transport.getTransportInfo();
+  }
+
+  async dispatchPending(limit = 100): Promise<ProcessEventDispatchSummary> {
+    const transportInfo = this.transport.getTransportInfo();
+    const candidates = this.events
+      .filter((event) => event.delivery.state !== 'dispatched')
+      .slice(0, Math.max(1, Math.min(limit, 500)));
+
+    if (!transportInfo.readyForDispatch) {
+      return {
+        schemaVersion: 'bpcp.process-event-dispatch-summary.v1',
+        attempted: 0,
+        dispatched: 0,
+        failed: 0,
+        skipped: candidates.length,
+        blockers: transportInfo.blockers,
+        results: candidates.map((event) => this.skippedResult(event, transportInfo.blockers)),
+      };
+    }
+
+    const results: ProcessEventDispatchResult[] = [];
+    for (const event of candidates) {
+      const result = await this.transport.dispatch(event);
+      this.applyDispatchResult(event, result);
+      results.push(result);
+    }
+
+    this.persist();
+    return {
+      schemaVersion: 'bpcp.process-event-dispatch-summary.v1',
+      attempted: results.length,
+      dispatched: results.filter((result) => result.state === 'dispatched').length,
+      failed: results.filter((result) => result.state === 'failed').length,
+      skipped: results.filter((result) => result.state === 'skipped').length,
+      blockers: [],
+      results,
     };
   }
 
@@ -98,5 +156,61 @@ export class EventPublisherService {
 
   private nextId(processId: string, version: number, type: ProcessEventType): string {
     return `${processId}:${version}:${type}:${this.events.length + 1}`;
+  }
+
+  private getStateCounts(): Record<'pending' | 'dispatched' | 'failed', number> {
+    return this.events.reduce(
+      (counts, event) => {
+        counts[event.delivery.state] += 1;
+        return counts;
+      },
+      { pending: 0, dispatched: 0, failed: 0 },
+    );
+  }
+
+  private applyDispatchResult(event: ProcessEventEnvelope, result: ProcessEventDispatchResult): void {
+    const attempts = event.delivery.attempts + 1;
+    if (result.state === 'dispatched') {
+      event.delivery = {
+        state: 'dispatched',
+        transport: result.transport,
+        attempts,
+        exchange: result.exchange,
+        routingKey: result.routingKey,
+        lastAttemptAt: result.attemptedAt,
+        dispatchedAt: result.attemptedAt,
+        missing: [],
+      };
+      return;
+    }
+
+    if (result.state === 'failed') {
+      event.delivery = {
+        ...event.delivery,
+        state: 'failed',
+        transport: result.transport,
+        attempts,
+        exchange: result.exchange,
+        routingKey: result.routingKey,
+        lastAttemptAt: result.attemptedAt,
+        error: result.error,
+        missing: result.blockers,
+      };
+    }
+  }
+
+  private skippedResult(event: ProcessEventEnvelope, blockers: string[]): ProcessEventDispatchResult {
+    const transportInfo = this.transport.getTransportInfo();
+    const routingKey = transportInfo.routingKeys[event.type];
+    return {
+      schemaVersion: 'bpcp.process-event-dispatch-result.v1',
+      eventId: event.id,
+      state: 'skipped',
+      transport: 'rabbitmq-topic',
+      exchange: transportInfo.exchange,
+      routingKey,
+      attemptedAt: new Date().toISOString(),
+      blockers,
+    };
   }
 }
