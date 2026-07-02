@@ -1,7 +1,7 @@
 # BPCP Orchestrator Status
 
 Date: 2026-07-02
-Status: code implementation in progress
+Status: implementation started; code validation passing; deployment blocked by owner
 
 ## Current scope
 
@@ -10,20 +10,22 @@ Status: code implementation in progress
 - Holiday Discount seed process.
 - Process lifecycle gates: validate, schedule, publish, pause, retire.
 - Process audit events persisted with process registry state.
+- Policy registry with seeded Holiday Discount policy.
+- Workflow registry with seeded Holiday Discount workflows.
 - Capability registry.
-- Simulation endpoint.
-- Visual editor skeleton.
+- Deterministic Holiday Discount simulation scenarios.
+- Visual editor with typed nodes, edges, inspector, export, and client-side validation.
 - Contract verification scripts.
 
 ## Goal-driven lanes
 
-| Lane | Owner | Status | Files |
+| Lane | Owner | Status | Evidence |
 |---|---|---|---|
-| Process registry and persistence | main orchestrator | in progress | `src/processes/**`, `src/storage/**` |
-| Policy/workflow schema registry | sub-agent | ready_parallel | `src/policies/**`, `src/workflows/**` |
-| Visual editor | sub-agent | ready_parallel | `src/editor/**` |
-| Simulation scenarios | sub-agent | ready_parallel | `src/simulation/**` |
-| Integration and validation | main orchestrator | final_integration | shared scripts/docs/package/app module |
+| Process registry and persistence | main orchestrator | complete for code validation | `npm run verify:process-registry` |
+| Policy/workflow schema registry | sub-agent, integrated by main | complete for code validation | `npm run verify:policy-workflow` |
+| Visual editor | sub-agent, integrated by main | complete for code validation | `npm run verify:editor` |
+| Simulation scenarios | sub-agent, integrated by main | complete for code validation | `npm run verify:simulation` |
+| Integration and validation | main orchestrator | complete for current non-deploy scope | `npm test`, runtime smoke |
 
 ## Blockers
 
@@ -32,6 +34,9 @@ Status: code implementation in progress
 - [MISSING: Auth RBAC roles]
 - [MISSING: production deployment manifest]
 - [MISSING: pricing/cart owner contract]
+- [MISSING: approved Holiday Discount category refs]
+- [MISSING: final paid-order event contract]
+- [MISSING: approved Holiday Discount notification template ref]
 
 ## Deployment status
 
@@ -42,5 +47,9 @@ owner until cluster/deployment issues are fixed.
 
 - `npm run verify:contracts`
 - `npm run verify:process-registry`
+- `npm run verify:policy-workflow`
+- `npm run verify:editor`
 - `npm run build`
-- runtime smoke for `/health`, `/api/processes`, `/editor`
+- `npm run verify:simulation`
+- `npm test`
+- runtime smoke for `/health`, `/api/processes`, `/api/policies`, `/api/workflows`, `/api/simulate`, `/editor`

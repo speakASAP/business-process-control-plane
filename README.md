@@ -1,7 +1,7 @@
 # Business Process Control Plane
 
-Business Process Control Plane, or BPCP, is a proposed Alfares ecosystem
-service for dynamic business processes.
+Business Process Control Plane, or BPCP, is an Alfares ecosystem service for
+dynamic business processes.
 
 It provides:
 
@@ -17,10 +17,13 @@ It provides:
 
 ## Current state
 
-This service now has a JSON-backed local process registry for code validation.
-The JSON store is not the final production persistence decision; it exists so
-process lifecycle, validation, audit, and editor flows can be developed without
-waiting for Kubernetes or database wiring.
+This service has a JSON-backed local process registry for code validation and
+typed in-memory policy/workflow registries for the Holiday Discount pilot.
+
+The JSON process store is not the final production persistence decision; it
+exists so process lifecycle, validation, audit, editor, policy/workflow, and
+simulation flows can be developed without waiting for Kubernetes or database
+wiring.
 
 ## Local commands
 
@@ -28,7 +31,10 @@ waiting for Kubernetes or database wiring.
 npm install
 npm run verify:contracts
 npm run verify:process-registry
+npm run verify:policy-workflow
+npm run verify:editor
 npm run build
+npm run verify:simulation
 npm test
 npm run start:dev
 ```
@@ -53,6 +59,12 @@ POST /api/processes/:processId/versions/:version/schedule
 POST /api/processes/:processId/versions/:version/publish
 POST /api/processes/:processId/versions/:version/pause
 POST /api/processes/:processId/versions/:version/retire
+GET  /api/policies
+GET  /api/policies/:policyId/versions/:version
+POST /api/policies/:policyId/versions/:version/validate
+GET  /api/workflows
+GET  /api/workflows/:workflowId/versions/:version
+POST /api/workflows/:workflowId/versions/:version/validate
 GET  /api/capabilities
 POST /api/simulate
 ```

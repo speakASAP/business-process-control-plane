@@ -7,9 +7,16 @@ export class HealthController {
     return {
       ok: true,
       service: 'business-process-control-plane',
-      status: 'skeleton',
+      status: 'implementation-started',
+      implemented: [
+        'json-backed process registry for code validation',
+        'policy registry',
+        'workflow registry',
+        'simulation scenarios',
+        'visual process editor',
+      ],
       missing: [
-        'persistent store',
+        'production persistence decision',
         'event bus runtime',
         'auth RBAC role mapping',
         'production deployment manifest',

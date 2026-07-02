@@ -3,8 +3,10 @@ import { ConfigModule } from '@nestjs/config';
 import { CapabilityRegistryModule } from './capabilities/capability-registry.module';
 import { EditorModule } from './editor/editor.module';
 import { HealthModule } from './health/health.module';
+import { PolicyRegistryModule } from './policies/policy-registry.module';
 import { ProcessRegistryModule } from './processes/process-registry.module';
 import { SimulationModule } from './simulation/simulation.module';
+import { WorkflowRegistryModule } from './workflows/workflow-registry.module';
 
 @Module({
   imports: [
@@ -12,8 +14,10 @@ import { SimulationModule } from './simulation/simulation.module';
     CapabilityRegistryModule,
     EditorModule,
     HealthModule,
+    PolicyRegistryModule,
     ProcessRegistryModule,
     SimulationModule,
+    WorkflowRegistryModule,
   ],
 })
 export class AppModule {}
