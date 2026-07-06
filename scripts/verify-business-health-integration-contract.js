@@ -101,6 +101,7 @@ const checks = [
       "plane: 'marketplaces'",
       'Aukro read-only channel readback endpoint exists',
       'Heureka read-only channel readback endpoint exists',
+      'Allegro read-only channel readback endpoint exists',
       'FlipFlop service-owned channel readback business-health endpoint',
       'READ_ONLY_MUTATION_BOUNDARY',
       'mutatesProduction: false',
@@ -450,6 +451,60 @@ const checks = [
     path: path.join(githubRoot, 'heureka/scripts/verify-business-health-heureka-channel-contract.js'),
     snippets: [
       'heureka.channel_readback_business_health.v1',
+      'forbiddenPatternsChecked',
+    ],
+  },
+  {
+    label: 'Allegro handoff',
+    path: path.join(githubRoot, 'allegro/docs/orchestrator/2026-07-06-allegro-business-health-handoff.md'),
+    snippets: [
+      'allegro.channel_readback_business_health.v1',
+      'stock-order-marketplace-business-health.v1',
+      'approved live Allegro readback packet',
+      '[MISSING:',
+    ],
+  },
+  {
+    label: 'Allegro business health controller',
+    path: path.join(githubRoot, 'allegro/services/allegro-service/src/business-health/business-health.controller.ts'),
+    snippets: [
+      "@Controller('allegro/business-health')",
+      "@Get('channel-readback')",
+      'getChannelReadback',
+    ],
+  },
+  {
+    label: 'Allegro business health service',
+    path: path.join(githubRoot, 'allegro/services/allegro-service/src/business-health/business-health.service.ts'),
+    snippets: [
+      "const ENDPOINT = '/allegro/business-health/channel-readback' as const;",
+      'allegro.channel_readback_business_health.v1',
+      'stock-order-marketplace-business-health.v1',
+      'runtimeDataQueried: false',
+      'productionDbQueried: false',
+      'liveSyntheticMutationAuthorized: false',
+      'offerImportAuthorized: false',
+      'stockSyncAuthorized: false',
+      'orderImportAuthorized: false',
+      'mutatesMarketplaceOffer: false',
+      'approved live Allegro readback packet',
+    ],
+  },
+  {
+    label: 'Allegro business health types',
+    path: path.join(githubRoot, 'allegro/services/allegro-service/src/business-health/business-health.types.ts'),
+    snippets: [
+      'AllegroChannelReadbackBusinessHealthEnvelope',
+      "endpoint: '/allegro/business-health/channel-readback'",
+      'mutatesMarketplaceOffer: false',
+      'productionDbQueried: false',
+    ],
+  },
+  {
+    label: 'Allegro verifier',
+    path: path.join(githubRoot, 'allegro/scripts/verify-business-health-allegro-channel-contract.js'),
+    snippets: [
+      'allegro.channel_readback_business_health.v1',
       'forbiddenPatternsChecked',
     ],
   },
