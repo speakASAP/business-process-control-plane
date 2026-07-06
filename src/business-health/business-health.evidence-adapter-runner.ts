@@ -67,10 +67,17 @@ const ADAPTER_DEFINITIONS: StaticAdapterDefinition[] = [
   },
   {
     plane: 'warehouse',
-    status: 'blocked',
-    summary: 'Warehouse handoff exists, but BPCP has no stable runtime evidence envelope to consume yet.',
-    sourceRefs: ['warehouse-microservice/docs/orchestrator/2026-07-06-warehouse-business-health-handoff.md'],
-    blockers: ['[MISSING: stable read-only Warehouse stock authority evidence envelope]'],
+    status: 'warn',
+    summary: 'Warehouse read-only stock authority evidence endpoint exists; live stock-row proof remains runtime-packet gated.',
+    sourceRefs: [
+      'warehouse-microservice/src/business-health/business-health.controller.ts',
+      'warehouse-microservice/src/business-health/business-health.service.ts',
+      'warehouse-microservice/docs/orchestrator/2026-07-06-warehouse-business-health-handoff.md',
+    ],
+    blockers: [
+      '[MISSING: approved live Warehouse stock authority runtime evidence packet for target products]',
+      '[MISSING: exact target product/warehouse/reservation readback scope for live stock-row proof]',
+    ],
   },
   {
     plane: 'orders',

@@ -217,7 +217,8 @@ These scenarios are contract requirements only. They are not implemented by this
 
 ## Runtime And Integration Blockers
 
-- `[MISSING: stable read-only Warehouse stock authority evidence envelope]`
+- `[RESOLVED: Warehouse read-only stock authority evidence endpoint exists at GET /api/business-health/stock-authority]`
+- `[MISSING: approved live Warehouse stock authority runtime evidence packet for target products]`
 - `[MISSING: stable Orders reservation gate and order/reservation correlation evidence contract]`
 - `[MISSING: Catalog/Warehouse/channel availability projection evidence contract]`
 - `[MISSING: Suppliers -> Warehouse traceability evidence contract]`

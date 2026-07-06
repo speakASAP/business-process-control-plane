@@ -26,7 +26,7 @@ Mutation boundary: read-only source/docs verification only
 | Master plan | `business-process-control-plane` | `docs/orchestrator/2026-07-06-stock-order-marketplace-business-health-master-plan.md` | ready | docs only |
 | Process contract | `business-process-control-plane` | `docs/orchestrator/2026-07-06-stock-reservation-cross-channel-process-contract.md` | ready | docs + source verifier only |
 | Marketplace inventory | `business-process-control-plane` | `docs/orchestrator/2026-07-06-marketplace-channel-business-health-inventory.md` | ready | docs only; channel repos unchanged |
-| Warehouse stock authority packet | `warehouse-microservice` | `docs/orchestrator/2026-07-06-warehouse-business-health-handoff.md`; `scripts/verify-business-health-stock-authority-contract.js` | ready | source/docs verifier; no production query/mutation |
+| Warehouse stock authority packet | `warehouse-microservice` | `GET /api/business-health/stock-authority`; `src/business-health/**`; `scripts/verify-business-health-stock-authority-contract.js` | source endpoint ready; live stock-row proof gated | static source endpoint only; no production DB query/mutation |
 | Catalog/channel availability handoff | `catalog-microservice` | `docs/orchestrator/2026-07-06-catalog-channel-business-health-handoff.md` | ready | docs only |
 | Suppliers traceability packet | `suppliers-microservice` | `docs/orchestrator/2026-07-06-suppliers-business-health-handoff.md`; `scripts/verify-business-health-suppliers-contract.js` | ready | source/docs verifier; no live supplier import |
 | Orders lifecycle packet | `orders-microservice` | existing runtime packet docs and verifiers | blocked for new edits | current untracked files require ownership resolution |
@@ -63,7 +63,7 @@ Status rules:
 - `warn`: source/readiness evidence exists, but runtime proof is incomplete and no live regression is proven.
 - `pass`: all required read-only evidence exists for the requested scope and no blocker remains.
 
-For the current checkpoint, expected overall status is `warn` or `blocked`, not `pass`, because Orders new-packet work is blocked by dirty worktree ownership and synthetic mutation is intentionally blocked.
+For the current checkpoint, expected overall status is `blocked`, not `pass`, because Orders new-packet work, live Warehouse stock-row proof, and synthetic mutation are intentionally packet-gated.
 
 ## Integration Decisions
 
