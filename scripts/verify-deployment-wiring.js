@@ -40,6 +40,7 @@ const checks = [
   [deployment, 'image: localhost:5000/business-process-control-plane:latest'],
   [deployment, 'configMapRef:'],
   [deployment, 'secretRef:'],
+  [deployment, 'type: Recreate'],
   [deployment, 'mountPath: /var/lib/bpcp'],
   [deployment, 'claimName: business-process-control-plane-data'],
   [deployment, 'path: /health'],
