@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { BusinessHealthModule } from './business-health/business-health.module';
 import { CapabilityRegistryModule } from './capabilities/capability-registry.module';
 import { EditorModule } from './editor/editor.module';
 import { EventsModule } from './events/events.module';
@@ -13,6 +14,7 @@ import { WorkflowRegistryModule } from './workflows/workflow-registry.module';
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     CapabilityRegistryModule,
+    BusinessHealthModule,
     EditorModule,
     EventsModule,
     HealthModule,

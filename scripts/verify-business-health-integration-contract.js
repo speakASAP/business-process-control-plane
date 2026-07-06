@@ -47,6 +47,45 @@ const checks = [
     ],
   },
   {
+    label: 'BPCP business health module',
+    path: path.join(bpcpRoot, 'src/business-health/business-health.module.ts'),
+    snippets: [
+      'BusinessHealthController',
+      'BusinessHealthService',
+      'export class BusinessHealthModule',
+    ],
+  },
+  {
+    label: 'BPCP business health controller',
+    path: path.join(bpcpRoot, 'src/business-health/business-health.controller.ts'),
+    snippets: [
+      "@Controller('api/business-health')",
+      "@Get('stock-order-marketplace')",
+      'getStockOrderMarketplaceHealth',
+    ],
+  },
+  {
+    label: 'BPCP business health service',
+    path: path.join(bpcpRoot, 'src/business-health/business-health.service.ts'),
+    snippets: [
+      'stock-order-marketplace-business-health.v1',
+      'stock-reservation-cross-channel-v1',
+      'mutatesProduction: false',
+      "overallStatus: 'blocked'",
+      'Domain services must publish service-owned evidence envelopes before BPCP can aggregate runtime truth.',
+    ],
+  },
+  {
+    label: 'BPCP business health types',
+    path: path.join(bpcpRoot, 'src/business-health/business-health.types.ts'),
+    snippets: [
+      'BusinessHealthReport',
+      'BusinessHealthPlaneKey',
+      'BusinessHealthStatus',
+      'EvidenceSummary',
+    ],
+  },
+  {
     label: 'Warehouse handoff',
     path: path.join(githubRoot, 'warehouse-microservice/docs/orchestrator/2026-07-06-warehouse-business-health-handoff.md'),
     snippets: [
