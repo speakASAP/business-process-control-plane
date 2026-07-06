@@ -24,6 +24,10 @@ Smoke validation was run from `outputs/process-registry-package/` to prove the p
 | `MANIFEST.json` syntax | pass | pass | pass |
 | Package `registry.collection.json` syntax | pass | pass | pass |
 
+## Repository Validation Integration
+
+The package is now covered by the root BPCP `scripts/verify-process-registry.js` verifier. `npm run verify:process-registry` and `npm test` fail if required package files, ADR/runtime tradeoff markers, draft/runtime-ready expectations, event envelope checks, or registry collection access-control checks drift.
+
 ## Current Package Runtime Verdict
 
 The package is structurally usable but not runtime-ready. `registry.collection.json` intentionally contains only a `draft` process definition, so active runtime lookup for `flipflop.successful_customer_journey.v1` fails with `active.zero`.

@@ -98,6 +98,10 @@ The registry-collection validator covers:
 - one currently effective active version per `process_key`
 - zero-active runtime-blocking condition for requested `--process-key`
 
+## Repository Validation Integration
+
+The package is now wired into `scripts/verify-process-registry.js`, which is invoked by `npm run verify:process-registry` and the repository-level `npm test` pipeline. The root verifier preserves existing BPCP process-registry source checks and also runs the FlipFlop package validators with expected pass/fail outcomes.
+
 ## Current Runtime Verdict
 
 `flipflop.successful_customer_journey.v1.draft.json` is structurally valid as a draft, but it is not runtime-ready. Runtime readiness fails because the artifact is still `status=draft` and contains unresolved `[MISSING: ...]` blockers.
@@ -108,9 +112,9 @@ The registry-collection validator covers:
 - [MISSING: current FlipFlop checkout/service architecture and runtime language boundaries]
 - [MISSING: production persistence, queue, and scheduler contracts for FlipFlop]
 - [MISSING: event payload contracts for customer journey steps]
-- [MISSING: storage location and access-control model for process-registry definitions]
+- [RESOLVED: business-process-control-plane is the source-of-truth repo for process-registry package placement]
 - [UNKNOWN: whether first release needs durable long-running orchestration or only governed process-state lookup]
 
 ## Next Validation Lane
 
-Process registry package has been placed in business-process-control-plane on branch process/flipflop-registry-package; next validation lane is CI wiring and owner/approval metadata completion.
+Process registry package has been placed in business-process-control-plane and wired into `npm run verify:process-registry` plus `npm test`; next validation lane is owner/approval metadata completion and FlipFlop runtime consumer contract design.
