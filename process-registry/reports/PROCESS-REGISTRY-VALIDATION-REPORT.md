@@ -113,4 +113,4 @@ The registry-collection validator covers:
 
 ## Next Validation Lane
 
-Move the local registry collection model into the eventual target repository once [MISSING: repository path or service boundary for process-registry source of truth] is resolved.
+Process registry package has been placed in business-process-control-plane on branch process/flipflop-registry-package; next validation lane is CI wiring and owner/approval metadata completion.

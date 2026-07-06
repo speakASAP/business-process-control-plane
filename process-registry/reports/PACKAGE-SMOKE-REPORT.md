@@ -32,7 +32,7 @@ That is the expected fail-closed behavior until process ownership, IPS trace, ev
 
 ## Remaining Blockers
 
-- [MISSING: repository path or service boundary for process-registry source of truth]
+- [RESOLVED: business-process-control-plane is the source-of-truth repo for process-registry package placement]
 - [MISSING: approved FlipFlop process-owner role and approval authority]
 - [MISSING: approved FlipFlop role-to-identity mapping]
 - [MISSING: current FlipFlop checkout/service architecture and runtime language boundaries]

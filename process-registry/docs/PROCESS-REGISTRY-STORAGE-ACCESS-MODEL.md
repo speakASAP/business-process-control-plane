@@ -119,6 +119,6 @@ Runtime services may not:
 
 - [MISSING: approved FlipFlop role-to-identity mapping]
 - [MISSING: production persistence, queue, and scheduler contracts for FlipFlop]
-- [MISSING: repository path or service boundary for process-registry source of truth]
+- [RESOLVED: business-process-control-plane is the source-of-truth repo for process-registry package placement]
 - [MISSING: runtime projection storage decision]
 - [UNKNOWN: whether the first release needs durable long-running orchestration or only governed process-state lookup]

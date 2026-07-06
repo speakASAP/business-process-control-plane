@@ -34,7 +34,7 @@ The package registry currently fails runtime active lookup by design because onl
 
 ## Remaining Blockers
 
-- [MISSING: repository path or service boundary for process-registry source of truth]
+- [RESOLVED: business-process-control-plane is the source-of-truth repo for process-registry package placement]
 - [MISSING: approved FlipFlop process-owner role and approval authority]
 - [MISSING: event payload contracts for customer journey steps]
 - [MISSING: runtime projection storage decision]

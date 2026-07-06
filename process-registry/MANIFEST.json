@@ -17,7 +17,7 @@
     "package_smoke": "reports/PACKAGE-SMOKE-REPORT.md"
   },
   "blockers": [
-    "[MISSING: repository path or service boundary for process-registry source of truth]",
+    "[RESOLVED: business-process-control-plane is the source-of-truth repo for process-registry package placement]",
     "[MISSING: approved FlipFlop process-owner role and approval authority]",
     "[MISSING: current FlipFlop checkout/service architecture and runtime language boundaries]",
     "[MISSING: production persistence, queue, and scheduler contracts for FlipFlop]",
