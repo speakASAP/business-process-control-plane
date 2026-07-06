@@ -1,0 +1,135 @@
+import { Injectable } from '@nestjs/common';
+import {
+  BusinessHealthEvidenceAdapter,
+  BusinessHealthEvidenceAdapterResult,
+  BusinessHealthMutationBoundary,
+  BusinessHealthPlaneKey,
+  BusinessHealthStatus,
+  EvidenceSummary,
+} from './business-health.types';
+
+export const CHECKPOINT_DOC = 'docs/orchestrator/2026-07-06-business-health-integration-checkpoint.md';
+export const PROCESS_CONTRACT_DOC = 'docs/orchestrator/2026-07-06-stock-reservation-cross-channel-process-contract.md';
+
+const READ_ONLY_MUTATION_BOUNDARY: BusinessHealthMutationBoundary = {
+  mutatesProduction: false,
+  mutationType: 'none',
+  declaration:
+    'In-process BPCP adapter runner returns committed source references only; it performs no sibling repo filesystem reads, service calls, provider calls, deploys, Kubernetes access, secret reads, or production mutations.',
+};
+
+interface StaticAdapterDefinition {
+  plane: BusinessHealthPlaneKey;
+  status: BusinessHealthStatus;
+  summary: string;
+  sourceRefs: string[];
+  blockers: string[];
+}
+
+class StaticBusinessHealthEvidenceAdapter implements BusinessHealthEvidenceAdapter {
+  readonly plane: BusinessHealthPlaneKey;
+
+  constructor(private readonly definition: StaticAdapterDefinition) {
+    this.plane = definition.plane;
+  }
+
+  collectEvidence(): BusinessHealthEvidenceAdapterResult {
+    const evidence: EvidenceSummary = {
+      plane: this.definition.plane,
+      status: this.definition.status,
+      summary: this.definition.summary,
+      source: this.definition.sourceRefs[0],
+      sourceRefs: [...this.definition.sourceRefs],
+      blockers: [...this.definition.blockers],
+      mutationBoundary: { ...READ_ONLY_MUTATION_BOUNDARY },
+      mutatesProduction: false,
+    };
+
+    return {
+      plane: this.definition.plane,
+      status: this.definition.status,
+      evidence,
+      blockers: [...this.definition.blockers],
+      sourceRefs: [...this.definition.sourceRefs],
+      mutationBoundary: { ...READ_ONLY_MUTATION_BOUNDARY },
+    };
+  }
+}
+
+const ADAPTER_DEFINITIONS: StaticAdapterDefinition[] = [
+  {
+    plane: 'controlPlane',
+    status: 'ready',
+    summary:
+      'BPCP source checkpoint, process contract, and in-process adapter runner exist for the business-health aggregation schema.',
+    sourceRefs: [CHECKPOINT_DOC, PROCESS_CONTRACT_DOC, 'src/business-health/business-health.evidence-adapter-runner.ts'],
+    blockers: [],
+  },
+  {
+    plane: 'warehouse',
+    status: 'blocked',
+    summary: 'Warehouse handoff exists, but BPCP has no stable runtime evidence envelope to consume yet.',
+    sourceRefs: ['warehouse-microservice/docs/orchestrator/2026-07-06-warehouse-business-health-handoff.md'],
+    blockers: ['[MISSING: stable read-only Warehouse stock authority evidence envelope]'],
+  },
+  {
+    plane: 'orders',
+    status: 'blocked',
+    summary: 'Orders packet work remains blocked by ownership and correlation-evidence readiness.',
+    sourceRefs: [CHECKPOINT_DOC],
+    blockers: ['[MISSING: stable Orders reservation gate and order/reservation correlation evidence contract]'],
+  },
+  {
+    plane: 'catalog',
+    status: 'blocked',
+    summary: 'Catalog/channel handoff exists, but the projection evidence contract is not yet stable.',
+    sourceRefs: ['catalog-microservice/docs/orchestrator/2026-07-06-catalog-channel-business-health-handoff.md'],
+    blockers: ['[MISSING: Catalog/Warehouse/channel availability projection evidence contract]'],
+  },
+  {
+    plane: 'suppliers',
+    status: 'blocked',
+    summary:
+      'Suppliers traceability handoff exists, but real supplier readiness must remain distinct from synthetic evidence.',
+    sourceRefs: ['suppliers-microservice/docs/orchestrator/2026-07-06-suppliers-business-health-handoff.md'],
+    blockers: ['[MISSING: Suppliers -> Warehouse traceability evidence contract]'],
+  },
+  {
+    plane: 'marketplaces',
+    status: 'blocked',
+    summary: 'Marketplace inventory exists, but per-channel readback semantics and mutation policies are unresolved.',
+    sourceRefs: ['docs/orchestrator/2026-07-06-marketplace-channel-business-health-inventory.md'],
+    blockers: [
+      '[MISSING: per-marketplace read-only availability readback evidence and provider semantics]',
+      '[MISSING: approved marketplace sandbox/dry-run/de-list policy for each live channel]',
+    ],
+  },
+];
+
+const ADAPTER_ORDER: BusinessHealthPlaneKey[] = [
+  'controlPlane',
+  'warehouse',
+  'orders',
+  'catalog',
+  'suppliers',
+  'marketplaces',
+];
+
+@Injectable()
+export class BusinessHealthEvidenceAdapterRunner {
+  private readonly adapters: BusinessHealthEvidenceAdapter[] = ADAPTER_DEFINITIONS.map(
+    (definition) => new StaticBusinessHealthEvidenceAdapter(definition),
+  );
+
+  runAdapters(): BusinessHealthEvidenceAdapterResult[] {
+    return ADAPTER_ORDER.map((plane) => this.requireAdapter(plane).collectEvidence());
+  }
+
+  private requireAdapter(plane: BusinessHealthPlaneKey): BusinessHealthEvidenceAdapter {
+    const adapter = this.adapters.find((candidate) => candidate.plane === plane);
+    if (!adapter) {
+      throw new Error(`Missing business health evidence adapter for ${plane}`);
+    }
+    return adapter;
+  }
+}

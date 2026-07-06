@@ -8,12 +8,35 @@ export type BusinessHealthPlaneKey =
   | 'suppliers'
   | 'marketplaces';
 
+export interface BusinessHealthMutationBoundary {
+  mutatesProduction: false;
+  mutationType: 'none';
+  declaration: string;
+}
+
 export interface EvidenceSummary {
   plane: BusinessHealthPlaneKey;
   status: BusinessHealthStatus;
   summary: string;
   source: string;
+  sourceRefs: string[];
+  blockers: string[];
+  mutationBoundary: BusinessHealthMutationBoundary;
   mutatesProduction: false;
+}
+
+export interface BusinessHealthEvidenceAdapterResult {
+  plane: BusinessHealthPlaneKey;
+  status: BusinessHealthStatus;
+  evidence: EvidenceSummary;
+  blockers: string[];
+  sourceRefs: string[];
+  mutationBoundary: BusinessHealthMutationBoundary;
+}
+
+export interface BusinessHealthEvidenceAdapter {
+  readonly plane: BusinessHealthPlaneKey;
+  collectEvidence(): BusinessHealthEvidenceAdapterResult;
 }
 
 export interface BusinessHealthOwnershipBoundary {

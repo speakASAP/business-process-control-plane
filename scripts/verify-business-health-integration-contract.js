@@ -51,6 +51,7 @@ const checks = [
     path: path.join(bpcpRoot, 'src/business-health/business-health.module.ts'),
     snippets: [
       'BusinessHealthController',
+      'BusinessHealthEvidenceAdapterRunner',
       'BusinessHealthService',
       'export class BusinessHealthModule',
     ],
@@ -70,9 +71,27 @@ const checks = [
     snippets: [
       'stock-order-marketplace-business-health.v1',
       'stock-reservation-cross-channel-v1',
+      'adapterRunner.runAdapters()',
+      'computeOverallStatus',
       'mutatesProduction: false',
-      "overallStatus: 'blocked'",
       'Domain services must publish service-owned evidence envelopes before BPCP can aggregate runtime truth.',
+    ],
+  },
+  {
+    label: 'BPCP business health adapter runner',
+    path: path.join(bpcpRoot, 'src/business-health/business-health.evidence-adapter-runner.ts'),
+    snippets: [
+      'BusinessHealthEvidenceAdapterRunner',
+      'BusinessHealthEvidenceAdapter',
+      'runAdapters()',
+      "plane: 'controlPlane'",
+      "plane: 'warehouse'",
+      "plane: 'orders'",
+      "plane: 'catalog'",
+      "plane: 'suppliers'",
+      "plane: 'marketplaces'",
+      'READ_ONLY_MUTATION_BOUNDARY',
+      'mutatesProduction: false',
     ],
   },
   {
@@ -83,6 +102,9 @@ const checks = [
       'BusinessHealthPlaneKey',
       'BusinessHealthStatus',
       'EvidenceSummary',
+      'BusinessHealthEvidenceAdapter',
+      'BusinessHealthEvidenceAdapterResult',
+      'BusinessHealthMutationBoundary',
     ],
   },
   {
@@ -143,6 +165,33 @@ const forbiddenSnippets = [
   'INSERT INTO stock',
 ];
 
+const runtimeSourceChecks = [
+  'src/business-health/business-health.controller.ts',
+  'src/business-health/business-health.evidence-adapter-runner.ts',
+  'src/business-health/business-health.module.ts',
+  'src/business-health/business-health.service.ts',
+  'src/business-health/business-health.types.ts',
+];
+
+const forbiddenRuntimeSnippets = [
+  'readFileSync',
+  'readdirSync',
+  'writeFileSync',
+  'existsSync',
+  'createReadStream',
+  'fetch(',
+  'axios',
+  'HttpService',
+  'ClientProxy',
+  'child_process',
+  'exec(',
+  'spawn(',
+  'kubectl',
+  './scripts/deploy.sh',
+  'process.env',
+  '@nestjs/schedule',
+];
+
 const summary = {
   schemaVersion: 'stock-order-marketplace-business-health.integration-check.v1',
   processId: 'stock-reservation-cross-channel-v1',
@@ -186,6 +235,17 @@ for (const check of checks) {
   }
 
   summary.blockersPreserved += (text.match(/\[MISSING:|\[UNKNOWN:/g) || []).length;
+}
+
+for (const runtimePath of runtimeSourceChecks) {
+  const text = readFile(path.join(bpcpRoot, runtimePath), `Runtime source boundary ${runtimePath}`);
+  if (!text) continue;
+
+  for (const forbidden of forbiddenRuntimeSnippets) {
+    if (text.includes(forbidden)) {
+      summary.forbidden.push(`${runtimePath}: forbidden runtime snippet ${forbidden}`);
+    }
+  }
 }
 
 const bpcpProcessVerifier = path.join(bpcpRoot, 'scripts/verify-stock-reservation-process-contract.js');
