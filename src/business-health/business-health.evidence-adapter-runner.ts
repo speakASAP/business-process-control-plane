@@ -134,7 +134,7 @@ const ADAPTER_DEFINITIONS: StaticAdapterDefinition[] = [
     plane: 'marketplaces',
     status: 'warn',
     summary:
-      'Marketplace inventory exists; Aukro read-only channel readback endpoint exists; Heureka read-only channel readback endpoint exists; Allegro read-only channel readback endpoint exists; remaining channel envelopes and live provider proofs are gated.',
+      'Marketplace inventory exists; Aukro read-only channel readback endpoint exists; Heureka read-only channel readback endpoint exists; Allegro read-only channel readback endpoint exists; Bazos read-only channel readback endpoint exists; remaining channel envelopes and live provider proofs are gated.',
     sourceRefs: [
       'docs/orchestrator/2026-07-06-marketplace-channel-business-health-inventory.md',
       'aukro/services/aukro-service/src/business-health/business-health.controller.ts',
@@ -146,13 +146,16 @@ const ADAPTER_DEFINITIONS: StaticAdapterDefinition[] = [
       'allegro/services/allegro-service/src/business-health/business-health.controller.ts',
       'allegro/services/allegro-service/src/business-health/business-health.service.ts',
       'allegro/docs/orchestrator/2026-07-06-allegro-business-health-handoff.md',
+      'bazos/services/aukro-service/src/business-health/business-health.controller.ts',
+      'bazos/services/aukro-service/src/business-health/business-health.service.ts',
+      'bazos/docs/orchestrator/2026-07-06-bazos-business-health-handoff.md',
     ],
     blockers: [
       '[MISSING: FlipFlop service-owned channel readback business-health endpoint]',
-      '[MISSING: Bazos service-owned channel readback business-health endpoint]',
       '[MISSING: approved live Aukro readback packet]',
       '[MISSING: approved live Heureka readback packet]',
       '[MISSING: approved live Allegro readback packet]',
+      '[MISSING: approved live Bazos readback packet]',
       '[MISSING: approved marketplace sandbox/dry-run/de-list policy for each live channel]',
     ],
   },

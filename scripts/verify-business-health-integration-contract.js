@@ -102,6 +102,7 @@ const checks = [
       'Aukro read-only channel readback endpoint exists',
       'Heureka read-only channel readback endpoint exists',
       'Allegro read-only channel readback endpoint exists',
+      'Bazos read-only channel readback endpoint exists',
       'FlipFlop service-owned channel readback business-health endpoint',
       'READ_ONLY_MUTATION_BOUNDARY',
       'mutatesProduction: false',
@@ -505,6 +506,60 @@ const checks = [
     path: path.join(githubRoot, 'allegro/scripts/verify-business-health-allegro-channel-contract.js'),
     snippets: [
       'allegro.channel_readback_business_health.v1',
+      'forbiddenPatternsChecked',
+    ],
+  },
+  {
+    label: 'Bazos handoff',
+    path: path.join(githubRoot, 'bazos/docs/orchestrator/2026-07-06-bazos-business-health-handoff.md'),
+    snippets: [
+      'bazos.channel_readback_business_health.v1',
+      'stock-order-marketplace-business-health.v1',
+      'approved live Bazos readback packet',
+      '[MISSING:',
+    ],
+  },
+  {
+    label: 'Bazos business health controller',
+    path: path.join(githubRoot, 'bazos/services/aukro-service/src/business-health/business-health.controller.ts'),
+    snippets: [
+      "@Controller('bazos/business-health')",
+      "@Get('channel-readback')",
+      'getChannelReadback',
+    ],
+  },
+  {
+    label: 'Bazos business health service',
+    path: path.join(githubRoot, 'bazos/services/aukro-service/src/business-health/business-health.service.ts'),
+    snippets: [
+      "const ENDPOINT = '/bazos/business-health/channel-readback' as const;",
+      'bazos.channel_readback_business_health.v1',
+      'stock-order-marketplace-business-health.v1',
+      'runtimeDataQueried: false',
+      'productionDbQueried: false',
+      'liveSyntheticMutationAuthorized: false',
+      'importOrSyncAuthorized: false',
+      'orderIngestionAuthorized: false',
+      'localAdMutationAuthorized: false',
+      'mutatesMarketplaceListing: false',
+      'approved live Bazos readback packet',
+    ],
+  },
+  {
+    label: 'Bazos business health types',
+    path: path.join(githubRoot, 'bazos/services/aukro-service/src/business-health/business-health.types.ts'),
+    snippets: [
+      'BazosChannelReadbackBusinessHealthEnvelope',
+      "endpoint: '/bazos/business-health/channel-readback'",
+      'mutatesMarketplaceListing: false',
+      'productionDbQueried: false',
+    ],
+  },
+  {
+    label: 'Bazos verifier',
+    path: path.join(githubRoot, 'bazos/scripts/verify-business-health-bazos-channel-contract.js'),
+    snippets: [
+      'bazos.channel_readback_business_health.v1',
       'forbiddenPatternsChecked',
     ],
   },
