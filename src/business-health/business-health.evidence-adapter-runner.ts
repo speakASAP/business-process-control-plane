@@ -114,11 +114,21 @@ const ADAPTER_DEFINITIONS: StaticAdapterDefinition[] = [
   },
   {
     plane: 'suppliers',
-    status: 'blocked',
+    status: 'warn',
     summary:
-      'Suppliers traceability handoff exists, but real supplier readiness must remain distinct from synthetic evidence.',
-    sourceRefs: ['suppliers-microservice/docs/orchestrator/2026-07-06-suppliers-business-health-handoff.md'],
-    blockers: ['[MISSING: Suppliers -> Warehouse traceability evidence contract]'],
+      'Suppliers read-only supplier-to-Warehouse traceability endpoint exists; real supplier procurement readiness remains data-gated.',
+    sourceRefs: [
+      'suppliers-microservice/src/business-health/business-health.controller.ts',
+      'suppliers-microservice/src/business-health/business-health.service.ts',
+      'suppliers-microservice/docs/orchestrator/2026-07-06-suppliers-business-health-handoff.md',
+    ],
+    blockers: [
+      '[MISSING: real supplier display name, stable supplier code, business owner, technical owner, and escalation path]',
+      '[MISSING: authentication shape and runtime credential reference key names]',
+      '[MISSING: product identity mapping, Catalog category mapping prerequisites, and Catalog write constraints]',
+      '[MISSING: warehouse/location mapping, dropship versus supplier-managed semantics, and Warehouse mutation approval boundary]',
+      '[MISSING: owner validation evidence and explicit approval for any runtime import, deployment, Catalog write, or Warehouse mutation]',
+    ],
   },
   {
     plane: 'marketplaces',
