@@ -91,6 +91,8 @@ const checks = [
       'approved live Warehouse stock authority runtime evidence packet',
       "plane: 'orders'",
       "plane: 'catalog'",
+      'Catalog read-only channel availability evidence endpoint exists',
+      'approved live Catalog channel availability runtime evidence packet',
       "plane: 'suppliers'",
       "plane: 'marketplaces'",
       'READ_ONLY_MUTATION_BOUNDARY',
@@ -167,9 +169,54 @@ const checks = [
     path: path.join(githubRoot, 'catalog-microservice/docs/orchestrator/2026-07-06-catalog-channel-business-health-handoff.md'),
     snippets: [
       'Catalog Channel Business Health Handoff',
+      'catalog.channel_availability_business_health.v1',
+      'stock-order-marketplace-business-health.v1',
       'live regression',
       'validation debt',
       'External Marketplace Mutation Blockers',
+    ],
+  },
+  {
+    label: 'Catalog business health controller',
+    path: path.join(githubRoot, 'catalog-microservice/src/business-health/business-health.controller.ts'),
+    snippets: [
+      '@Controller("business-health")',
+      '@Get("channel-availability")',
+      'getChannelAvailabilityEnvelope',
+    ],
+  },
+  {
+    label: 'Catalog business health service',
+    path: path.join(githubRoot, 'catalog-microservice/src/business-health/business-health.service.ts'),
+    snippets: [
+      'const ENDPOINT = "/api/business-health/channel-availability" as const;',
+      'catalog.channel_availability_business_health.v1',
+      'stock-order-marketplace-business-health.v1',
+      'runtimeDataQueried: false',
+      'productionDbQueried: false',
+      'liveSyntheticMutationAuthorized: false',
+      'approved live Catalog channel availability runtime evidence packet',
+    ],
+  },
+  {
+    label: 'Catalog business health types',
+    path: path.join(githubRoot, 'catalog-microservice/src/business-health/business-health.types.ts'),
+    snippets: [
+      'CatalogChannelAvailabilityBusinessHealthEnvelope',
+      'endpoint: "/api/business-health/channel-availability"',
+      'mutatesCatalog: false',
+      'mutatesWarehouse: false',
+      'mutatesMarketplace: false',
+      'productionDbQueried: false',
+    ],
+  },
+  {
+    label: 'Catalog verifier',
+    path: path.join(githubRoot, 'catalog-microservice/scripts/verify-business-health-catalog-channel-contract.js'),
+    snippets: [
+      'catalog.channel_availability_business_health.v1',
+      'mutatesCatalog',
+      'forbiddenBusinessHealthPatternsChecked',
     ],
   },
   {

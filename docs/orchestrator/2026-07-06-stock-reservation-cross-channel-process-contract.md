@@ -103,7 +103,7 @@ Missing process registry facts:
 | BPCP | Process contract, version status, validation result, health envelope schema, future aggregation/reporting, simulation scenario catalog. | Domain stock, orders, payments, supplier intake, catalog readiness, marketplace writes, final price, invoices, notifications. | `stock-reservation-cross-channel-v1` process definition, monitor schema, source validation. |
 | `warehouse-microservice` | Stock authority, quantity/reserved/available invariant, reservation lifecycle, fulfillment/decrement, stock events/outbox. | Order acceptance, catalog channel readiness, marketplace listing state, supplier intake. | `[MISSING: stable read-only stock authority evidence envelope]` |
 | `orders-microservice` | Order lifecycle, reservation gate before accepted order, cancellation, payment handoff, fulfillment handoff. | Warehouse stock mutation authority, payment provider capture, marketplace listing writes. | `[MISSING: order/reservation correlation evidence contract]` |
-| `catalog-microservice` | Product sellability metadata, channel readiness, projection of availability to product/channel surfaces. | Warehouse stock authority, order reservation, marketplace external write finality. | `[MISSING: Catalog/Warehouse availability projection evidence contract]` |
+| `catalog-microservice` | Product sellability metadata, channel readiness, projection of availability to product/channel surfaces. | Warehouse stock authority, order reservation, marketplace external write finality. | `[RESOLVED: Catalog read-only channel availability evidence endpoint exists at GET /api/business-health/channel-availability]`; `[MISSING: approved live Catalog channel availability runtime evidence packet for target products]` |
 | `suppliers-microservice` | Supplier intake, traceability evidence into Warehouse-owned stock. | Warehouse final stock authority after reconciliation, channel sellability. | `[MISSING: supplier-to-warehouse reconciliation evidence contract]` |
 | Marketplace/channel services | Channel-specific listing readiness, external readback, availability convergence, provider policy boundaries. | Warehouse stock authority, order/payment domain finality. | `[MISSING: per-channel read-only availability readback evidence and external mutation policy]` |
 | Payment/provider owners | Payment success/failure facts and provider-side finality. | Warehouse stock decrement, BPCP health aggregation. | `[MISSING: redacted payment outcome evidence boundary]` |
@@ -220,7 +220,10 @@ These scenarios are contract requirements only. They are not implemented by this
 - `[RESOLVED: Warehouse read-only stock authority evidence endpoint exists at GET /api/business-health/stock-authority]`
 - `[MISSING: approved live Warehouse stock authority runtime evidence packet for target products]`
 - `[MISSING: stable Orders reservation gate and order/reservation correlation evidence contract]`
-- `[MISSING: Catalog/Warehouse/channel availability projection evidence contract]`
+- `[RESOLVED: Catalog read-only channel availability evidence endpoint exists at GET /api/business-health/channel-availability]`
+- `[MISSING: approved live Catalog channel availability runtime evidence packet for target products]`
+- `[MISSING: exact target product IDs and channel list for live Catalog business-health proof]`
+- `[MISSING: approved protected Catalog service token or JWT for live coverage/projection/readiness checks]`
 - `[MISSING: Suppliers -> Warehouse traceability evidence contract]`
 - `[MISSING: per-marketplace read-only availability readback evidence and provider semantics]`
 - `[MISSING: payment outcome redaction boundary and finality evidence source]`

@@ -88,10 +88,20 @@ const ADAPTER_DEFINITIONS: StaticAdapterDefinition[] = [
   },
   {
     plane: 'catalog',
-    status: 'blocked',
-    summary: 'Catalog/channel handoff exists, but the projection evidence contract is not yet stable.',
-    sourceRefs: ['catalog-microservice/docs/orchestrator/2026-07-06-catalog-channel-business-health-handoff.md'],
-    blockers: ['[MISSING: Catalog/Warehouse/channel availability projection evidence contract]'],
+    status: 'warn',
+    summary:
+      'Catalog read-only channel availability evidence endpoint exists; live product/channel proof remains runtime-packet gated.',
+    sourceRefs: [
+      'catalog-microservice/src/business-health/business-health.controller.ts',
+      'catalog-microservice/src/business-health/business-health.service.ts',
+      'catalog-microservice/docs/orchestrator/2026-07-06-catalog-channel-business-health-handoff.md',
+    ],
+    blockers: [
+      '[MISSING: approved live Catalog channel availability runtime evidence packet for target products]',
+      '[MISSING: exact target product IDs and channel list for live business-health proof]',
+      '[MISSING: approved protected Catalog service token or JWT for live coverage/projection/readiness checks]',
+      '[MISSING: channel-owner credentials/ownership packet for marketplace-side listing status proof]',
+    ],
   },
   {
     plane: 'suppliers',

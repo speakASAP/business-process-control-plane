@@ -27,7 +27,7 @@ Mutation boundary: read-only source/docs verification only
 | Process contract | `business-process-control-plane` | `docs/orchestrator/2026-07-06-stock-reservation-cross-channel-process-contract.md` | ready | docs + source verifier only |
 | Marketplace inventory | `business-process-control-plane` | `docs/orchestrator/2026-07-06-marketplace-channel-business-health-inventory.md` | ready | docs only; channel repos unchanged |
 | Warehouse stock authority packet | `warehouse-microservice` | `GET /api/business-health/stock-authority`; `src/business-health/**`; `scripts/verify-business-health-stock-authority-contract.js` | source endpoint ready; live stock-row proof gated | static source endpoint only; no production DB query/mutation |
-| Catalog/channel availability handoff | `catalog-microservice` | `docs/orchestrator/2026-07-06-catalog-channel-business-health-handoff.md` | ready | docs only |
+| Catalog/channel availability packet | `catalog-microservice` | `GET /api/business-health/channel-availability`; `src/business-health/**`; `scripts/verify-business-health-catalog-channel-contract.js` | source endpoint ready; live product/channel proof gated | static source endpoint only; no production DB/API query or marketplace mutation |
 | Suppliers traceability packet | `suppliers-microservice` | `docs/orchestrator/2026-07-06-suppliers-business-health-handoff.md`; `scripts/verify-business-health-suppliers-contract.js` | ready | source/docs verifier; no live supplier import |
 | Orders lifecycle packet | `orders-microservice` | existing runtime packet docs and verifiers | blocked for new edits | current untracked files require ownership resolution |
 
