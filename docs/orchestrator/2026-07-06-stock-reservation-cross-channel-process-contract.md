@@ -105,7 +105,7 @@ Missing process registry facts:
 | `orders-microservice` | Order lifecycle, reservation gate before accepted order, cancellation, payment handoff, fulfillment handoff. | Warehouse stock mutation authority, payment provider capture, marketplace listing writes. | `[RESOLVED: Orders read-only order/reservation correlation evidence endpoint exists at GET /api/business-health/order-reservation-correlation]`; `[MISSING: approved live Orders/Warehouse runtime evidence packet for target order/product/channel]` |
 | `catalog-microservice` | Product sellability metadata, channel readiness, projection of availability to product/channel surfaces. | Warehouse stock authority, order reservation, marketplace external write finality. | `[RESOLVED: Catalog read-only channel availability evidence endpoint exists at GET /api/business-health/channel-availability]`; `[MISSING: approved live Catalog channel availability runtime evidence packet for target products]` |
 | `suppliers-microservice` | Supplier intake, traceability evidence into Warehouse-owned stock. | Warehouse final stock authority after reconciliation, channel sellability. | `[RESOLVED: Suppliers read-only supplier-to-Warehouse traceability evidence endpoint exists at GET /api/business-health/supplier-warehouse-traceability]`; `[MISSING: real supplier procurement facts and Warehouse mutation approval boundary]` |
-| Marketplace/channel services | Channel-specific listing readiness, external readback, availability convergence, provider policy boundaries. | Warehouse stock authority, order/payment domain finality. | `[MISSING: per-channel read-only availability readback evidence and external mutation policy]` |
+| Marketplace/channel services | Channel-specific listing readiness, external readback, availability convergence, provider policy boundaries. | Warehouse stock authority, order/payment domain finality. | `[RESOLVED/PARTIAL: Aukro read-only channel readback evidence endpoint exists at GET /aukro/business-health/channel-readback]`; `[MISSING: FlipFlop/Bazos/Allegro/Heureka service-owned channel readback endpoints]`; `[MISSING: per-channel live provider readback packets and external mutation policies]` |
 | Payment/provider owners | Payment success/failure facts and provider-side finality. | Warehouse stock decrement, BPCP health aggregation. | `[MISSING: redacted payment outcome evidence boundary]` |
 | Ops/Scheduler | Future run cadence, retention, alert routing, dashboard or report delivery. | Domain service data mutation. | `[MISSING: scheduler owner, cadence, alert routing, and evidence retention policy]` |
 
@@ -233,7 +233,12 @@ These scenarios are contract requirements only. They are not implemented by this
 - `[MISSING: product identity mapping, Catalog category mapping prerequisites, and Catalog write constraints]`
 - `[MISSING: warehouse/location mapping, dropship versus supplier-managed semantics, and Warehouse mutation approval boundary]`
 - `[MISSING: owner validation evidence and explicit approval for any runtime import, deployment, Catalog write, or Warehouse mutation]`
-- `[MISSING: per-marketplace read-only availability readback evidence and provider semantics]`
+- `[RESOLVED/PARTIAL: Aukro read-only channel readback evidence endpoint exists at GET /aukro/business-health/channel-readback]`
+- `[MISSING: FlipFlop service-owned channel readback business-health endpoint]`
+- `[MISSING: Bazos service-owned channel readback business-health endpoint]`
+- `[MISSING: Allegro service-owned channel readback business-health endpoint]`
+- `[MISSING: Heureka service-owned channel readback business-health endpoint]`
+- `[MISSING: per-marketplace live availability readback evidence and provider semantics]`
 - `[MISSING: payment outcome redaction boundary and finality evidence source]`
 - `[MISSING: scheduler owner, cadence, alert routing, and dashboard/report destination]`
 - `[MISSING: business health evidence retention policy]`

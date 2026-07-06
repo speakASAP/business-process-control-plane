@@ -99,6 +99,8 @@ const checks = [
       'Suppliers read-only supplier-to-Warehouse traceability endpoint exists',
       'real supplier procurement readiness remains data-gated',
       "plane: 'marketplaces'",
+      'Aukro read-only channel readback endpoint exists',
+      'FlipFlop service-owned channel readback business-health endpoint',
       'READ_ONLY_MUTATION_BOUNDARY',
       'mutatesProduction: false',
     ],
@@ -346,6 +348,57 @@ const checks = [
     snippets: [
       'checkedSnippets',
       'missingMarkers',
+    ],
+  },
+  {
+    label: 'Aukro handoff',
+    path: path.join(githubRoot, 'aukro/docs/orchestrator/2026-07-06-aukro-business-health-handoff.md'),
+    snippets: [
+      'aukro.channel_readback_business_health.v1',
+      'stock-order-marketplace-business-health.v1',
+      'approved live Aukro readback packet',
+      '[MISSING:',
+    ],
+  },
+  {
+    label: 'Aukro business health controller',
+    path: path.join(githubRoot, 'aukro/services/aukro-service/src/business-health/business-health.controller.ts'),
+    snippets: [
+      "@Controller('business-health')",
+      "@Get('channel-readback')",
+      'getChannelReadback',
+    ],
+  },
+  {
+    label: 'Aukro business health service',
+    path: path.join(githubRoot, 'aukro/services/aukro-service/src/business-health/business-health.service.ts'),
+    snippets: [
+      "const ENDPOINT = '/aukro/business-health/channel-readback' as const;",
+      'aukro.channel_readback_business_health.v1',
+      'stock-order-marketplace-business-health.v1',
+      'runtimeDataQueried: false',
+      'productionDbQueried: false',
+      'liveSyntheticMutationAuthorized: false',
+      'mutatesMarketplaceOffer: false',
+      'approved live Aukro readback packet',
+    ],
+  },
+  {
+    label: 'Aukro business health types',
+    path: path.join(githubRoot, 'aukro/services/aukro-service/src/business-health/business-health.types.ts'),
+    snippets: [
+      'AukroChannelReadbackBusinessHealthEnvelope',
+      "endpoint: '/aukro/business-health/channel-readback'",
+      'mutatesMarketplaceOffer: false',
+      'productionDbQueried: false',
+    ],
+  },
+  {
+    label: 'Aukro verifier',
+    path: path.join(githubRoot, 'aukro/scripts/verify-business-health-aukro-channel-contract.js'),
+    snippets: [
+      'aukro.channel_readback_business_health.v1',
+      'forbiddenPatternsChecked',
     ],
   },
 ];
