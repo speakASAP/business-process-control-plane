@@ -36,6 +36,9 @@ export class ProcessRegistryService {
     if (!this.processes.has(this.key('holiday-discount-2026', 1))) {
       this.seedHolidayDiscount();
     }
+    if (!this.processes.has(this.key('flipflop.successful_customer_journey.v1', 1))) {
+      this.seedFlipFlopSuccessfulCustomerJourney();
+    }
   }
 
   listProcesses(): BusinessProcessDefinition[] {
@@ -300,6 +303,33 @@ export class ProcessRegistryService {
     this.appendAudit('seeded', process, {
       source: 'service bootstrap',
       reason: 'Holiday Discount pilot seed process',
+    });
+    this.persist();
+  }
+
+  private seedFlipFlopSuccessfulCustomerJourney(): void {
+    const now = new Date().toISOString();
+    const process: BusinessProcessDefinition = {
+      schemaVersion: 'bpcp.process.v1',
+      processId: 'flipflop.successful_customer_journey.v1',
+      version: 1,
+      status: 'draft',
+      policyRefs: [],
+      workflowRefs: [],
+      campaignRefs: [],
+      killSwitch: true,
+      createdAt: now,
+      updatedAt: now,
+    };
+    this.processes.set(this.key(process.processId, process.version), process);
+    this.appendAudit('seeded', process, {
+      source: 'process-registry/definitions/flipflop.successful_customer_journey.v1/1.0.0-draft.json',
+      reason: 'FlipFlop successful customer journey registry-first draft seed',
+      blockers: [
+        '[MISSING: approved FlipFlop process-owner role and approval authority]',
+        '[MISSING: event payload contracts for customer journey steps]',
+        '[MISSING: runtime projection storage decision]',
+      ],
     });
     this.persist();
   }
