@@ -29,7 +29,7 @@ Mutation boundary: read-only source/docs verification only
 | Warehouse stock authority packet | `warehouse-microservice` | `GET /api/business-health/stock-authority`; `src/business-health/**`; `scripts/verify-business-health-stock-authority-contract.js` | source endpoint ready; live stock-row proof gated | static source endpoint only; no production DB query/mutation |
 | Catalog/channel availability packet | `catalog-microservice` | `GET /api/business-health/channel-availability`; `src/business-health/**`; `scripts/verify-business-health-catalog-channel-contract.js` | source endpoint ready; live product/channel proof gated | static source endpoint only; no production DB/API query or marketplace mutation |
 | Suppliers traceability packet | `suppliers-microservice` | `docs/orchestrator/2026-07-06-suppliers-business-health-handoff.md`; `scripts/verify-business-health-suppliers-contract.js` | ready | source/docs verifier; no live supplier import |
-| Orders lifecycle packet | `orders-microservice` | existing runtime packet docs and verifiers | blocked for new edits | current untracked files require ownership resolution |
+| Orders order/reservation correlation packet | `orders-microservice` | `GET /api/business-health/order-reservation-correlation`; `src/business-health/**`; `scripts/verify-business-health-orders-reservation-contract.js` | source endpoint ready; live order/reservation proof gated | static source endpoint only; no production DB/API query or order/warehouse/payment mutation |
 
 ## Business Health Report Shape
 

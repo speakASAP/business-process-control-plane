@@ -81,10 +81,19 @@ const ADAPTER_DEFINITIONS: StaticAdapterDefinition[] = [
   },
   {
     plane: 'orders',
-    status: 'blocked',
-    summary: 'Orders packet work remains blocked by ownership and correlation-evidence readiness.',
-    sourceRefs: [CHECKPOINT_DOC],
-    blockers: ['[MISSING: stable Orders reservation gate and order/reservation correlation evidence contract]'],
+    status: 'warn',
+    summary:
+      'Orders read-only order/reservation correlation evidence endpoint exists; live order proof remains runtime-packet gated.',
+    sourceRefs: [
+      'orders-microservice/src/business-health/business-health.controller.ts',
+      'orders-microservice/src/business-health/business-health.service.ts',
+      'orders-microservice/docs/orchestrator/2026-07-06-orders-business-health-handoff.md',
+    ],
+    blockers: [
+      '[MISSING: approved live Orders/Warehouse runtime evidence packet for target order/product/channel]',
+      '[MISSING: exact target order/product/channel and warehouse reservation lookup scope for live correlation proof]',
+      '[MISSING: approved cleanup/payment/provider boundary packet if runtime proof creates or cancels a real order]',
+    ],
   },
   {
     plane: 'catalog',

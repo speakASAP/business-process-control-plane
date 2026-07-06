@@ -90,6 +90,8 @@ const checks = [
       'Warehouse read-only stock authority evidence endpoint exists',
       'approved live Warehouse stock authority runtime evidence packet',
       "plane: 'orders'",
+      'Orders read-only order/reservation correlation evidence endpoint exists',
+      'approved live Orders/Warehouse runtime evidence packet',
       "plane: 'catalog'",
       'Catalog read-only channel availability evidence endpoint exists',
       'approved live Catalog channel availability runtime evidence packet',
@@ -162,6 +164,64 @@ const checks = [
     snippets: [
       'warehouse.stock_authority_business_health.v1',
       'mutatesWarehouse',
+    ],
+  },
+  {
+    label: 'Orders handoff',
+    path: path.join(githubRoot, 'orders-microservice/docs/orchestrator/2026-07-06-orders-business-health-handoff.md'),
+    snippets: [
+      'Orders Business Health Handoff',
+      'orders.order_reservation_correlation_business_health.v1',
+      'stock-order-marketplace-business-health.v1',
+      'reservation-before-order-acceptance',
+      '[MISSING:',
+    ],
+  },
+  {
+    label: 'Orders business health controller',
+    path: path.join(githubRoot, 'orders-microservice/src/business-health/business-health.controller.ts'),
+    snippets: [
+      "@Controller('business-health')",
+      '@Public()',
+      "@Get('order-reservation-correlation')",
+      'getOrderReservationCorrelation',
+    ],
+  },
+  {
+    label: 'Orders business health service',
+    path: path.join(githubRoot, 'orders-microservice/src/business-health/business-health.service.ts'),
+    snippets: [
+      "const ENDPOINT = '/api/business-health/order-reservation-correlation' as const;",
+      'orders.order_reservation_correlation_business_health.v1',
+      'stock-order-marketplace-business-health.v1',
+      'mutatesOrders: false',
+      'mutatesWarehouse: false',
+      'mutatesPayments: false',
+      'runtimeDataQueried: false',
+      'productionDbQueried: false',
+      'liveSyntheticMutationAuthorized: false',
+      'approved live Orders/Warehouse runtime evidence packet',
+    ],
+  },
+  {
+    label: 'Orders business health types',
+    path: path.join(githubRoot, 'orders-microservice/src/business-health/business-health.types.ts'),
+    snippets: [
+      'OrderReservationCorrelationBusinessHealthEnvelope',
+      "endpoint: '/api/business-health/order-reservation-correlation'",
+      'mutatesOrders: false',
+      'mutatesWarehouse: false',
+      'mutatesPayments: false',
+      'productionDbQueried: false',
+    ],
+  },
+  {
+    label: 'Orders verifier',
+    path: path.join(githubRoot, 'orders-microservice/scripts/verify-business-health-orders-reservation-contract.js'),
+    snippets: [
+      'orders.order_reservation_correlation_business_health.v1',
+      'forbiddenEndpointPatternsChecked',
+      'mutatesOrders',
     ],
   },
   {
