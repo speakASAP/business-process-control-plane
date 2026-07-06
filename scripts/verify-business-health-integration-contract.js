@@ -100,6 +100,7 @@ const checks = [
       'real supplier procurement readiness remains data-gated',
       "plane: 'marketplaces'",
       'Aukro read-only channel readback endpoint exists',
+      'Heureka read-only channel readback endpoint exists',
       'FlipFlop service-owned channel readback business-health endpoint',
       'READ_ONLY_MUTATION_BOUNDARY',
       'mutatesProduction: false',
@@ -398,6 +399,57 @@ const checks = [
     path: path.join(githubRoot, 'aukro/scripts/verify-business-health-aukro-channel-contract.js'),
     snippets: [
       'aukro.channel_readback_business_health.v1',
+      'forbiddenPatternsChecked',
+    ],
+  },
+  {
+    label: 'Heureka handoff',
+    path: path.join(githubRoot, 'heureka/docs/orchestrator/2026-07-06-heureka-business-health-handoff.md'),
+    snippets: [
+      'heureka.channel_readback_business_health.v1',
+      'stock-order-marketplace-business-health.v1',
+      'approved live Heureka readback packet',
+      '[MISSING:',
+    ],
+  },
+  {
+    label: 'Heureka business health controller',
+    path: path.join(githubRoot, 'heureka/services/heureka-service/src/business-health/business-health.controller.ts'),
+    snippets: [
+      "@Controller('business-health')",
+      "@Get('channel-readback')",
+      'getChannelReadback',
+    ],
+  },
+  {
+    label: 'Heureka business health service',
+    path: path.join(githubRoot, 'heureka/services/heureka-service/src/business-health/business-health.service.ts'),
+    snippets: [
+      "const ENDPOINT = '/heureka/business-health/channel-readback' as const;",
+      'heureka.channel_readback_business_health.v1',
+      'stock-order-marketplace-business-health.v1',
+      'runtimeDataQueried: false',
+      'productionDbQueried: false',
+      'liveSyntheticMutationAuthorized: false',
+      'mutatesExternalFeed: false',
+      'approved live Heureka readback packet',
+    ],
+  },
+  {
+    label: 'Heureka business health types',
+    path: path.join(githubRoot, 'heureka/services/heureka-service/src/business-health/business-health.types.ts'),
+    snippets: [
+      'HeurekaChannelReadbackBusinessHealthEnvelope',
+      "endpoint: '/heureka/business-health/channel-readback'",
+      'mutatesExternalFeed: false',
+      'productionDbQueried: false',
+    ],
+  },
+  {
+    label: 'Heureka verifier',
+    path: path.join(githubRoot, 'heureka/scripts/verify-business-health-heureka-channel-contract.js'),
+    snippets: [
+      'heureka.channel_readback_business_health.v1',
       'forbiddenPatternsChecked',
     ],
   },
