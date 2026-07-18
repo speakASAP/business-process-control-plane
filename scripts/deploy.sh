@@ -42,28 +42,38 @@ if [ ! -d "$K8S_DIR" ]; then
   exit 1
 fi
 
-log "Validate ${SERVICE_NAME}"
+# shellcheck source=/dev/null
+source "$(dirname "$PROJECT_ROOT")/shared/scripts/load-deploy-phase-timing.sh" "$PROJECT_ROOT"
+deploy_timing_init "$SERVICE_NAME"
+
+deploy_timing_phase_start "Validate"
 npm test
+deploy_timing_phase_end "Validate"
 
-log "Build image ${IMAGE}"
+deploy_timing_phase_start "Build image"
 docker build -t "$IMAGE" -t "$IMAGE_LATEST" "$PROJECT_ROOT"
+deploy_timing_phase_end "Build image"
 
-log "Push image"
+deploy_timing_phase_start "Push image"
 docker push "$IMAGE"
 docker push "$IMAGE_LATEST"
+deploy_timing_phase_end "Push image"
 
-log "Apply Kubernetes manifests"
+deploy_timing_phase_start "Apply Kubernetes manifests"
 for manifest in configmap.yaml external-secret.yaml pvc.yaml service.yaml deployment.yaml; do
   kubectl apply -f "$K8S_DIR/$manifest" -n "$NAMESPACE"
 done
+deploy_timing_phase_end "Apply Kubernetes manifests"
 
-log "Set deployment image"
+deploy_timing_phase_start "Set deployment image"
 kubectl set image "deployment/${SERVICE_NAME}" app="$IMAGE" -n "$NAMESPACE"
+deploy_timing_phase_end "Set deployment image"
 
-log "Wait for rollout"
+deploy_timing_phase_start "Wait for rollout"
 kubectl rollout status "deployment/${SERVICE_NAME}" -n "$NAMESPACE" --timeout=180s
+deploy_timing_phase_end "Wait for rollout"
 
-log "Verify pod health and transport info"
+deploy_timing_phase_start "Health check"
 POD="$(kubectl get pod -n "$NAMESPACE" -l "app=${SERVICE_NAME}" -o jsonpath='{.items[0].metadata.name}')"
 if [ -z "$POD" ]; then
   echo "No pod found for ${SERVICE_NAME}" >&2
@@ -71,5 +81,7 @@ if [ -z "$POD" ]; then
 fi
 kubectl exec -n "$NAMESPACE" "$POD" -- wget -qO- "http://127.0.0.1:${HEALTH_PORT}/health" >/dev/null
 kubectl exec -n "$NAMESPACE" "$POD" -- wget -qO- "http://127.0.0.1:${HEALTH_PORT}/api/events/transport/info" >/dev/null
+deploy_timing_phase_end "Health check"
 
+deploy_timing_finish_success "$SERVICE_NAME"
 log "Deployed ${IMAGE}"
