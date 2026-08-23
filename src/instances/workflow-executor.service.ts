@@ -113,7 +113,7 @@ export class WorkflowExecutorService {
               this.logger.log(
                 `instance.waiting ${instanceId} action=${action.actionId} signal=${params.signalName}`,
               );
-              return (await this.repo.findById(instanceId)) as WorkflowInstanceEntity;
+              return (await this.repo.findById(instanceId, manager)) as WorkflowInstanceEntity;
             }
 
             step.status = 'succeeded';
@@ -148,7 +148,7 @@ export class WorkflowExecutorService {
 
           if (outcome.error.permanent || exhausted) {
             await this.failInstance(manager, instanceId, action.actionId, attempts, outcome.error);
-            return (await this.repo.findById(instanceId)) as WorkflowInstanceEntity;
+            return (await this.repo.findById(instanceId, manager)) as WorkflowInstanceEntity;
           }
 
           // Transient with retries left: stay pending so the next advance retries it.
@@ -162,7 +162,7 @@ export class WorkflowExecutorService {
           this.logger.warn(
             `action ${action.actionId} transient failure attempt ${attempts}/${MAX_ATTEMPTS}: ${outcome.error.message}`,
           );
-          return (await this.repo.findById(instanceId)) as WorkflowInstanceEntity;
+          return (await this.repo.findById(instanceId, manager)) as WorkflowInstanceEntity;
         }
       }
 
@@ -180,7 +180,7 @@ export class WorkflowExecutorService {
         this.logger.log(`instance.completed ${instanceId}`);
       }
 
-      return (await this.repo.findById(instanceId)) as WorkflowInstanceEntity;
+      return (await this.repo.findById(instanceId, manager)) as WorkflowInstanceEntity;
     });
 
     this.logger.log(`advance ${instanceId} finished in ${Date.now() - startedAt}ms status=${result.status}`);

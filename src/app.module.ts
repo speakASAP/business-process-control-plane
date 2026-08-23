@@ -6,6 +6,7 @@ import { DatabaseModule } from './database/database.module';
 import { EditorModule } from './editor/editor.module';
 import { EventsModule } from './events/events.module';
 import { HealthModule } from './health/health.module';
+import { InstancesModule } from './instances/instances.module';
 import { PolicyRegistryModule } from './policies/policy-registry.module';
 import { ProcessRegistryModule } from './processes/process-registry.module';
 import { SimulationModule } from './simulation/simulation.module';
@@ -20,6 +21,7 @@ import { WorkflowRegistryModule } from './workflows/workflow-registry.module';
     EditorModule,
     EventsModule,
     HealthModule,
+    InstancesModule,
     PolicyRegistryModule,
     ProcessRegistryModule,
     SimulationModule,

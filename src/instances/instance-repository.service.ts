@@ -64,8 +64,14 @@ export class InstanceRepositoryService {
     });
   }
 
-  async findById(instanceId: string): Promise<WorkflowInstanceEntity | null> {
-    return this.dataSource.getRepository(WorkflowInstanceEntity).findOne({ where: { instanceId } });
+  /**
+   * Pass `manager` when reading back inside a transaction. Without it the read runs on a
+   * separate connection and returns pre-transaction state — a write followed by an
+   * un-managed read silently reports the old status.
+   */
+  async findById(instanceId: string, manager?: EntityManager): Promise<WorkflowInstanceEntity | null> {
+    const runner = manager ?? this.dataSource.manager;
+    return runner.findOne(WorkflowInstanceEntity, { where: { instanceId } });
   }
 
   async findByCorrelation(workflowId: string, correlationKey: string): Promise<WorkflowInstanceEntity | null> {
@@ -195,7 +201,7 @@ export class InstanceRepositoryService {
         return instance;
       }
       await manager.update(WorkflowInstanceEntity, { instanceId }, { status: 'cancelled', wait: null });
-      return (await this.findById(instanceId)) as WorkflowInstanceEntity;
+      return (await this.findById(instanceId, manager)) as WorkflowInstanceEntity;
     });
   }
 }
