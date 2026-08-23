@@ -9,7 +9,7 @@
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:prod": "node dist/main",
-    "test": "npm run verify:contracts && npm run verify:process-registry && npm run verify:event-publication && npm run verify:event-transport && npm run verify:deployment-wiring && npm run verify:policy-workflow && npm run verify:editor && npm run build && npm run verify:simulation",
+    "test": "npm run verify:contracts && npm run verify:process-registry && npm run verify:event-publication && npm run verify:event-transport && npm run verify:deployment-wiring && npm run verify:policy-workflow && npm run verify:editor && npm run verify:instances && npm run build && npm run verify:simulation && npm run test:unit",
     "verify:contracts": "node scripts/verify-contracts.js",
     "verify:process-registry": "node scripts/verify-process-registry.js",
     "verify:event-publication": "node scripts/verify-event-publication.js",
@@ -17,7 +17,9 @@
     "verify:policy-workflow": "node scripts/verify-policy-workflow.js",
     "verify:editor": "node scripts/verify-editor-ui.js",
     "verify:simulation": "node scripts/verify-simulation-scenarios.js",
-    "verify:deployment-wiring": "node scripts/verify-deployment-wiring.js"
+    "verify:deployment-wiring": "node scripts/verify-deployment-wiring.js",
+    "verify:instances": "node scripts/verify-instances.js",
+    "test:unit": "jest"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",

@@ -13,6 +13,7 @@ export const KNOWN_WORKFLOW_ACTION_TYPES = [
   'snapshot-order-discount',
   'send-notification-template',
   'record-observability-event',
+  'wait-for-signal',
 ] as const;
 export type KnownWorkflowActionType = (typeof KNOWN_WORKFLOW_ACTION_TYPES)[number];
 export type WorkflowActionType = KnownWorkflowActionType | string;
@@ -62,4 +63,30 @@ export interface WorkflowValidationResult {
   version: number;
   valid: boolean;
   findings: WorkflowValidationFinding[];
+}
+
+export interface WaitForSignalParameters {
+  signalName: string;
+  /** null means wait indefinitely. */
+  timeoutMs: number | null;
+  onTimeout: 'fail' | 'continue';
+}
+
+export function isWaitForSignalAction(action: WorkflowActionDefinition): boolean {
+  return action.type === 'wait-for-signal';
+}
+
+export function readWaitParameters(action: WorkflowActionDefinition): WaitForSignalParameters {
+  const params = action.parameters ?? {};
+  const signalName = params.signalName;
+  if (typeof signalName !== 'string' || signalName.length === 0) {
+    // A defaulted signal name would make the instance wait for something nobody sends.
+    throw new Error(`wait-for-signal action "${action.actionId}" is missing a signalName parameter`);
+  }
+
+  const rawTimeout = params.timeoutMs;
+  const timeoutMs = typeof rawTimeout === 'number' && rawTimeout > 0 ? rawTimeout : null;
+  const onTimeout = params.onTimeout === 'continue' ? 'continue' : 'fail';
+
+  return { signalName, timeoutMs, onTimeout };
 }

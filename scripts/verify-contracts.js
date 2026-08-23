@@ -14,7 +14,7 @@ const required = [
   'src/simulation/simulation.controller.ts',
   'src/editor/editor.controller.ts',
   'docs/business-process-control-plane/README.md',
-  'docs/intent-preservation/README.md',
+  'docs/INTENT_PRESERVATION_README.md',
   'docs/orchestrator/STATUS.md',
 ];
 

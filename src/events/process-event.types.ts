@@ -97,3 +97,17 @@ export interface ProcessEventDispatchSummary {
   blockers: string[];
   results: ProcessEventDispatchResult[];
 }
+
+export const INSTANCE_EVENT_TYPES = [
+  'instance.started',
+  'instance.waiting',
+  'instance.resumed',
+  'instance.completed',
+  'instance.failed',
+] as const;
+
+export type InstanceEventType = (typeof INSTANCE_EVENT_TYPES)[number];
+
+export function instanceRoutingKey(type: InstanceEventType): string {
+  return `bpcp.${type}.v1`;
+}
