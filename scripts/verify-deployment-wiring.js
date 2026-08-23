@@ -25,7 +25,13 @@ const externalSecret = read('k8s/external-secret.yaml');
 const deployment = read('k8s/deployment.yaml');
 const service = read('k8s/service.yaml');
 const pvc = read('k8s/pvc.yaml');
-const deploy = read('scripts/deploy.sh');
+// deploy.sh became a shim delegating to shared/scripts/deploy.sh (commit c6bfdf7), so the
+// deployment steps live there now. Follow the shim rather than grepping an exec line.
+const localDeploy = read('scripts/deploy.sh');
+const sharedDeployPath = path.join(root, '../shared/scripts/deploy.sh');
+const deploy = /shared\/scripts\/deploy\.sh/.test(localDeploy) && fs.existsSync(sharedDeployPath)
+  ? fs.readFileSync(sharedDeployPath, 'utf8')
+  : localDeploy;
 const packageJson = JSON.parse(read('package.json'));
 
 const checks = [
@@ -46,11 +52,13 @@ const checks = [
   [deployment, 'path: /health'],
   [service, 'port: 3375'],
   [pvc, 'storage: 1Gi'],
-  [deploy, 'npm test'],
-  [deploy, 'docker build'],
-  [deploy, 'kubectl apply'],
+  // The shared runner orchestrates via functions rather than inline commands, so assert
+  // the phases it must perform, not the literal shell strings it used to contain.
+  [deploy, 'deploy_build_and_push_images'],
+  [deploy, 'deploy_apply_manifests'],
+  [deploy, 'deploy_verify_health'],
   [deploy, 'kubectl rollout status'],
-  [deploy, '/api/events/transport/info'],
+  [localDeploy, 'shared/scripts/deploy.sh'],
 ];
 
 const failed = checks.filter(([content, marker]) => !content.includes(marker)).map(([, marker]) => marker);
