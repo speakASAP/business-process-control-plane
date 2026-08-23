@@ -822,8 +822,8 @@ describe('ActionDispatcherService', () => {
   const action: WorkflowActionDefinition = {
     actionId: 'call-thing',
     type: 'call-service-capability',
-    serviceCapabilityRefs: [{ service: 'cv-microservice', capability: 'generate' } as never],
-    parameters: { url: 'http://cv-microservice:3379/api/internal/generate' },
+    serviceCapabilityRefs: [{ service: 'cv-tuning', capability: 'generate' } as never],
+    parameters: { url: 'http://cv-tuning:3379/api/internal/generate' },
   };
 
   beforeEach(() => {

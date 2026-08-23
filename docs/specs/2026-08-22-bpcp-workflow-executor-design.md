@@ -3,8 +3,8 @@
 **Date:** 2026-08-22
 **Status:** Approved for planning
 **Repo:** `business-process-control-plane` (port 3375)
-**Consumer:** `cv-microservice` (port 3379) — first real consumer
-**Related spec:** `cv-microservice/docs/specs/2026-08-22-cv-tailoring-platform-design.md`
+**Consumer:** `cv-tuning` (port 3379) — first real consumer
+**Related spec:** `cv-tuning/docs/specs/2026-08-22-cv-tailoring-platform-design.md`
 
 ---
 
