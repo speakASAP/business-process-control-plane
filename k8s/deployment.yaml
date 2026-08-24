@@ -35,6 +35,13 @@ spec:
           volumeMounts:
             - name: process-data
               mountPath: /var/lib/bpcp
+            # Workflow definitions owned by other services, loaded at boot by
+            # WorkflowRegistryService. Read-only: BPCP consumes these, the owning service
+            # publishes them. A malformed document fails the boot rather than 404ing every
+            # start() later.
+            - name: workflow-seeds
+              mountPath: /etc/bpcp/workflows
+              readOnly: true
           startupProbe:
             httpGet:
               path: /health
@@ -68,3 +75,7 @@ spec:
         - name: process-data
           persistentVolumeClaim:
             claimName: business-process-control-plane-data
+        - name: workflow-seeds
+          configMap:
+            name: bpcp-workflow-seeds
+            optional: true

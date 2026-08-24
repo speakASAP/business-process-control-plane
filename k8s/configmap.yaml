@@ -20,3 +20,6 @@ data:
   BPCP_EVENTS_EXCHANGE: "bpcp.events"
   BPCP_EVENTS_ROUTING_KEY_PREFIX: "bpcp.process"
   BPCP_EVENT_BUS_PUBLISH_TIMEOUT_MS: "5000"
+  # Directory of *.workflow.json documents published by the services that own them (mounted
+  # from the bpcp-workflow-seeds ConfigMap). Unset means built-in workflows only.
+  BPCP_WORKFLOW_SEED_DIR: "/etc/bpcp/workflows"
