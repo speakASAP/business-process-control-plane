@@ -104,3 +104,110 @@ describe('ActionDispatcherService', () => {
     expect(body.context).toEqual({ applicationId: 'app-1' });
   });
 });
+
+describe('ActionDispatcherService headers and env references', () => {
+  let fetchMock: jest.Mock;
+  let service: ActionDispatcherService;
+
+  beforeEach(() => {
+    fetchMock = jest.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) });
+    service = new ActionDispatcherService(fetchMock as unknown as typeof fetch);
+  });
+
+  afterEach(() => {
+    delete process.env.TEST_NUDGE_SECRET;
+  });
+
+  const withParams = (parameters: Record<string, unknown>): WorkflowActionDefinition => ({
+    actionId: 'call-thing',
+    type: 'call-service-capability',
+    serviceCapabilityRefs: [],
+    parameters: parameters as WorkflowActionDefinition['parameters'],
+  });
+
+  it('forwards a headers parameter alongside the content type', async () => {
+    await service.execute(
+      withParams({ url: 'http://cv-tuning:3379/api/nudges/outcome', headers: { 'x-a': 'b' } }),
+      {},
+    );
+
+    const init = fetchMock.mock.calls[0][1] as { headers: Record<string, string> };
+    expect(init.headers['content-type']).toBe('application/json');
+    expect(init.headers['x-a']).toBe('b');
+  });
+
+  it('resolves an ${env:VAR} reference so a secret never lives in the workflow document', async () => {
+    process.env.TEST_NUDGE_SECRET = 'super-secret';
+
+    await service.execute(
+      withParams({
+        url: 'http://cv-tuning:3379/api/nudges/outcome',
+        headers: { 'x-cv-nudge-secret': '${env:TEST_NUDGE_SECRET}' },
+      }),
+      {},
+    );
+
+    const init = fetchMock.mock.calls[0][1] as { headers: Record<string, string> };
+    expect(init.headers['x-cv-nudge-secret']).toBe('super-secret');
+  });
+
+  it('fails permanently when a referenced env var is unset, rather than sending an empty header', async () => {
+    const result = await service.execute(
+      withParams({
+        url: 'http://cv-tuning:3379/api/nudges/outcome',
+        headers: { 'x-cv-nudge-secret': '${env:TEST_NUDGE_SECRET}' },
+      }),
+      {},
+    );
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error.permanent).toBe(true);
+      expect(result.error.message).toContain('TEST_NUDGE_SECRET');
+    }
+    // An unresolved reference must never reach the wire: sending a literal "${env:...}" would
+    // look like a wrong secret and be diagnosed as an auth bug rather than a config one.
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('never echoes a resolved secret into the error context on a failure', async () => {
+    process.env.TEST_NUDGE_SECRET = 'super-secret';
+    fetchMock.mockResolvedValue({ ok: false, status: 403, text: async () => 'forbidden' });
+
+    const result = await service.execute(
+      withParams({
+        url: 'http://cv-tuning:3379/api/nudges/outcome',
+        headers: { 'x-cv-nudge-secret': '${env:TEST_NUDGE_SECRET}' },
+      }),
+      {},
+    );
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(JSON.stringify(result.error)).not.toContain('super-secret');
+  });
+
+  it('resolves an ${env:VAR} reference in the url too', async () => {
+    process.env.TEST_NUDGE_SECRET = 'cv-tuning:3379';
+
+    await service.execute(withParams({ url: 'http://${env:TEST_NUDGE_SECRET}/api/x' }), {});
+
+    expect(fetchMock.mock.calls[0][0]).toBe('http://cv-tuning:3379/api/x');
+  });
+
+  it('does not send the headers parameter in the body it posts', async () => {
+    process.env.TEST_NUDGE_SECRET = 'super-secret';
+
+    await service.execute(
+      withParams({
+        url: 'http://cv-tuning:3379/api/nudges/outcome',
+        headers: { 'x-cv-nudge-secret': '${env:TEST_NUDGE_SECRET}' },
+      }),
+      {},
+    );
+
+    // `parameters` is echoed into the body; a resolved secret there would be logged by every
+    // receiver that logs its request body.
+    const body = JSON.parse((fetchMock.mock.calls[0][1] as { body: string }).body);
+    expect(JSON.stringify(body)).not.toContain('super-secret');
+  });
+});

@@ -17,7 +17,20 @@ export const KNOWN_WORKFLOW_ACTION_TYPES = [
 ] as const;
 export type KnownWorkflowActionType = (typeof KNOWN_WORKFLOW_ACTION_TYPES)[number];
 export type WorkflowActionType = KnownWorkflowActionType | string;
-export type WorkflowValue = string | number | boolean | string[] | number[] | boolean[];
+/**
+ * A `headers` parameter carries outbound HTTP headers for a `call-service-capability` action.
+ * Values may be `${env:VAR}` references, resolved by the dispatcher at send time — a secret must
+ * never be a literal in a workflow document, which is stored, listed, and version-controlled.
+ */
+export type WorkflowHeaders = Record<string, string>;
+export type WorkflowValue =
+  | string
+  | number
+  | boolean
+  | string[]
+  | number[]
+  | boolean[]
+  | WorkflowHeaders;
 
 export interface WorkflowTriggerDefinition {
   type: WorkflowTriggerType;
