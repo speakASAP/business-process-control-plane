@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { containsMissingMarker, validateCapabilityRefs } from '../policies/capability-reference';
+import { loadWorkflowsFromDirectory } from './workflow-seed-loader';
 import {
   KNOWN_WORKFLOW_ACTION_TYPES,
   KNOWN_WORKFLOW_TRIGGER_TYPES,
@@ -277,6 +278,13 @@ export class WorkflowRegistryService {
 
   constructor() {
     for (const workflow of HOLIDAY_DISCOUNT_WORKFLOWS) {
+      this.upsertWorkflow(workflow);
+    }
+    // Workflows owned by other services (cv-tuning's outcome watch, for one) are mounted as
+    // JSON rather than hardcoded here. Loaded LAST so a seeded document deliberately overrides
+    // a built-in of the same id and version; a malformed one raises at boot rather than 404ing
+    // every start() later.
+    for (const workflow of loadWorkflowsFromDirectory(process.env.BPCP_WORKFLOW_SEED_DIR)) {
       this.upsertWorkflow(workflow);
     }
   }
