@@ -1,9 +1,9 @@
 # BPCP Service Implementation Notes
 
-Status: implementation started
-Date: 2026-07-02
+Status: durable-control-plane slice implemented
+Date: 2026-08-30
 
-This repository implements the proposed Business Process Control Plane service.
+This repository implements the Business Process Control Plane service.
 The central cross-service contract pack lives in:
 
 `/home/ssf/Documents/Github/statex-ecosystem/docs/business-process-control-plane/`
@@ -12,28 +12,32 @@ The central cross-service contract pack lives in:
 
 | Module | Purpose |
 |---|---|
-| `processes` | JSON-backed process registry, lifecycle gates, validation, audit |
-| `storage` | Local JSON file store for code validation before production persistence |
-| `events` | Local durable process-event outbox and disabled-by-default RabbitMQ transport |
+| `processes` | PostgreSQL-backed process registry, lifecycle gates, validation, audit |
+| `events` | PostgreSQL-backed process-event outbox and env-gated RabbitMQ dispatch/replay |
+| `auth` | Fail-closed identity validation guard for sensitive process/outbox mutation endpoints |
 | `capabilities` | Initial affected-service capability registry |
 | `simulation` | Deterministic Holiday Discount simulation endpoint |
 | `editor` | Built-in visual process editor skeleton |
 | `health` | Service health and missing runtime facts |
-| `k8s` | Initial Kubernetes deployment wiring with ConfigMap, ExternalSecret, PVC, Deployment, and Service |
+| `instances` | PostgreSQL-backed workflow instance runtime executor |
+| `k8s` | Kubernetes wiring with ConfigMap, ExternalSecret, Deployment, and Service |
 
 ## Runtime persistence
 
-The process registry persists to `BPCP_DATA_DIR/processes.json`.
-The process event outbox persists to `BPCP_DATA_DIR/process-event-outbox.json`.
-Default `BPCP_DATA_DIR` is `<repo>/data`, and `data/` is ignored by Git.
+The process registry now persists to PostgreSQL table `bpcp_process_definition`.
+Process audit events persist to `bpcp_process_audit_event`.
+Process event outbox envelopes persist to `bpcp_process_event_outbox`.
+Workflow instances remain in `bpcp_workflow_instance`, `bpcp_instance_step`, and
+`bpcp_instance_signal`.
 
-This is the current file-backed persistence layer. The Kubernetes manifest mounts `/var/lib/bpcp` from `business-process-control-plane-data` PVC for initial deployment durability. Final database/HA persistence remains `[MISSING: database persistence decision beyond initial file-backed PVC]`.
+No file/PVC-backed runtime process registry/outbox persistence is used in this
+slice.
 
 ## Process event publication
 
 Lifecycle actions emit `bpcp.process-event.v1` envelopes with process id,
 version, status, policy refs, workflow refs, campaign refs, lifecycle details,
-and pending delivery metadata.
+and durable delivery metadata.
 
 Current endpoints:
 
@@ -46,33 +50,23 @@ GET /api/events/outbox/:processId
 GET /api/events/transport/info
 ```
 
-The RabbitMQ adapter follows the verified Alfares pattern used by Orders,
-Marketing, Leads, and Invoices: topic exchange, durable exchange assertion,
-versioned routing keys, persistent JSON messages with `messageId=event.id` and `type=<routingKey>`, and env-gated enablement.
+Dispatch/replay behavior:
 
-Default BPCP publication contract:
+- dispatch claims undispatched rows with `FOR UPDATE SKIP LOCKED` and stale-claim recovery;
+- successful dispatch marks rows `dispatched` with immutable event ids;
+- failed dispatch marks rows `failed` with error context;
+- replay re-publishes already dispatched envelopes with stable `messageId=event.id`.
 
-```text
-exchange: bpcp.events
-routing keys:
-  bpcp.process.created.v1
-  bpcp.process.validated.v1
-  bpcp.process.scheduled.v1
-  bpcp.process.published.v1
-  bpcp.process.paused.v1
-  bpcp.process.retired.v1
-```
+## Auth boundary
 
-Dispatch is enabled in `k8s/configmap.yaml` after owner approval. `BPCP_EVENT_BUS_URL` and `RABBITMQ_URL` are sourced from Vault key `secret/prod/runlayer` property `RABBITMQ_URL`; `BPCP_PROCESS_SIGNING_SECRET` is sourced from `secret/prod/business-process-control-plane`. Downstream consumer queues and replay/backfill ownership remain service-owned.
+Sensitive process lifecycle and outbox mutation endpoints validate bearer tokens
+against `AUTH_SERVICE_URL` using a minimal fail-closed validation client/guard.
+No RBAC role assumptions are invented in this slice; unresolved role mapping
+remains a blocker.
 
-## Future modules
+## Remaining blockers
 
-- audit log client;
-- service adapter executor;
-- RBAC integration.
-
-## Replay and lifecycle hardening v1
-
-BPCP now exposes a bounded source-level replay endpoint for already-dispatched events: `POST /api/events/outbox/replay`. Operators must keep replay bounded with `limit`, and may scope by `processId` and `eventType`. Downstream consumers must bind lifecycle rollback events (`published`, `paused`, `retired`) instead of copying a published-only subscription.
-
-Remaining blocker: [MISSING: operator-approved replay endpoint runbook and durable replay audit policy].
+- [MISSING: exact Auth RBAC roles]
+- [MISSING: downstream BPCP event consumers and replay/backfill ownership]
+- [MISSING: operator-approved replay endpoint runbook and durable replay audit policy]
+- [MISSING: public process-editor ingress/domain]

@@ -4,30 +4,45 @@ const { spawnSync } = require('child_process');
 
 const root = process.cwd();
 const service = fs.readFileSync(path.join(root, 'src/processes/process-registry.service.ts'), 'utf8');
+const repository = fs.readFileSync(path.join(root, 'src/processes/process-registry.repository.ts'), 'utf8');
+const processEntity = fs.readFileSync(path.join(root, 'src/processes/entities/process-definition.entity.ts'), 'utf8');
+const auditEntity = fs.readFileSync(path.join(root, 'src/processes/entities/process-audit-event.entity.ts'), 'utf8');
+const migration = fs.readFileSync(
+  path.join(root, 'src/database/migrations/1756660000000-CreateProcessRegistryOutboxTables.ts'),
+  'utf8',
+);
+const controller = fs.readFileSync(path.join(root, 'src/processes/process-registry.controller.ts'), 'utf8');
 const types = fs.readFileSync(path.join(root, 'src/processes/process.types.ts'), 'utf8');
-const store = fs.readFileSync(path.join(root, 'src/storage/json-file-store.service.ts'), 'utf8');
 
 const checks = [
-  [service, 'ProcessStoreSnapshot'],
-  [service, 'appendAudit'],
-  [service, 'scheduleProcess'],
-  [service, 'publishProcess'],
-  [service, 'pauseProcess'],
-  [service, 'retireProcess'],
+  [service, 'ProcessRegistryRepository'],
+  [service, 'POSTGRES_RUNTIME_STORE_CONFIGURED'],
+  [service, 'appendAuditAndEvent'],
+  [service, 'ensureSeedProcesses'],
   [service, 'holiday-discount-2026'],
-  [service, 'seedFlipFlopSuccessfulCustomerJourney'],
+  [service, 'seedFlipFlopSuccessfulCustomerJourneyDefinition'],
   [service, 'flipflop.successful_customer_journey.v1'],
   [service, 'process-registry/definitions/flipflop.successful_customer_journey.v1/1.0.0-draft.json'],
+  [controller, '@UseGuards(AuthIdentityGuard)'],
+  [repository, 'pessimistic_write'],
+  [repository, 'bpcp_process_audit_event_seq'],
+  [processEntity, "@Entity('bpcp_process_definition')"],
+  [auditEntity, "@Entity('bpcp_process_audit_event')"],
+  [migration, 'bpcp_process_definition'],
+  [migration, 'bpcp_process_audit_event'],
+  [migration, 'bpcp_process_audit_event_seq'],
   [types, 'bpcp.process-audit.v1'],
-  [types, 'bpcp.process-store.v1'],
-  [store, 'writeJson'],
-  [store, 'BPCP_DATA_DIR'],
 ];
 
 const failed = checks.filter(([content, marker]) => !content.includes(marker)).map(([, marker]) => marker);
 if (failed.length > 0) {
   console.error('Process registry verification failed. Missing markers:');
   for (const marker of failed) console.error(`- ${marker}`);
+  process.exit(1);
+}
+
+if (service.includes('JsonFileStoreService') || service.includes('processes.json')) {
+  console.error('Process registry verification failed. File-backed process persistence markers are still present.');
   process.exit(1);
 }
 

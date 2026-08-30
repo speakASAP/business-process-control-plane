@@ -33,8 +33,6 @@ spec:
             - secretRef:
                 name: business-process-control-plane-secret
           volumeMounts:
-            - name: process-data
-              mountPath: /var/lib/bpcp
             # Workflow definitions owned by other services, loaded at boot by
             # WorkflowRegistryService. Read-only: BPCP consumes these, the owning service
             # publishes them. A malformed document fails the boot rather than 404ing every
@@ -72,9 +70,6 @@ spec:
               memory: "512Mi"
               cpu: "500m"
       volumes:
-        - name: process-data
-          persistentVolumeClaim:
-            claimName: business-process-control-plane-data
         - name: workflow-seeds
           configMap:
             name: bpcp-workflow-seeds

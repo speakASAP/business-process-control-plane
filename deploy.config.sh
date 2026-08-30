@@ -14,4 +14,4 @@ DEPLOYMENTS=(
 )
 
 # No ingress.yaml for this service.
-MANIFESTS=(configmap.yaml external-secret.yaml pvc.yaml service.yaml deployment.yaml)
+MANIFESTS=(configmap.yaml external-secret.yaml service.yaml deployment.yaml)

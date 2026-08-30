@@ -1,4 +1,5 @@
-import { Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
+import { AuthIdentityGuard } from '../auth/auth-identity.guard';
 import { EventPublisherService } from './event-publisher.service';
 import { ProcessEventType } from './process-event.types';
 
@@ -7,22 +8,24 @@ export class EventsController {
   constructor(private readonly eventPublisher: EventPublisherService) {}
 
   @Get('outbox')
-  listOutbox(@Query('processId') processId?: string) {
+  async listOutbox(@Query('processId') processId?: string) {
     return this.eventPublisher.listEvents(processId);
   }
 
   @Get('outbox/info')
-  getOutboxInfo() {
+  async getOutboxInfo() {
     return this.eventPublisher.getOutboxInfo();
   }
 
   @Post('outbox/dispatch')
-  dispatchOutbox(@Query('limit') limit?: string) {
+  @UseGuards(AuthIdentityGuard)
+  async dispatchOutbox(@Query('limit') limit?: string) {
     return this.eventPublisher.dispatchPending(limit ? Number.parseInt(limit, 10) : undefined);
   }
 
   @Post('outbox/replay')
-  replayOutbox(
+  @UseGuards(AuthIdentityGuard)
+  async replayOutbox(
     @Query('limit') limit?: string,
     @Query('processId') processId?: string,
     @Query('eventType') eventType?: ProcessEventType,
@@ -35,7 +38,7 @@ export class EventsController {
   }
 
   @Get('outbox/:processId')
-  listProcessOutbox(@Param('processId') processId: string) {
+  async listProcessOutbox(@Param('processId') processId: string) {
     return this.eventPublisher.listEvents(processId);
   }
 

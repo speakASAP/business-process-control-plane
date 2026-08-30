@@ -1,9 +1,12 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ProcessEventOutboxEntity } from '../events/entities/process-event-outbox.entity';
 import { InstanceSignalEntity } from '../instances/entities/instance-signal.entity';
 import { InstanceStepEntity } from '../instances/entities/instance-step.entity';
 import { WorkflowInstanceEntity } from '../instances/entities/workflow-instance.entity';
+import { ProcessAuditEventEntity } from '../processes/entities/process-audit-event.entity';
+import { ProcessDefinitionEntity } from '../processes/entities/process-definition.entity';
 
 @Module({
   imports: [
@@ -19,7 +22,14 @@ import { WorkflowInstanceEntity } from '../instances/entities/workflow-instance.
         return {
           type: 'postgres' as const,
           url,
-          entities: [WorkflowInstanceEntity, InstanceStepEntity, InstanceSignalEntity],
+          entities: [
+            WorkflowInstanceEntity,
+            InstanceStepEntity,
+            InstanceSignalEntity,
+            ProcessDefinitionEntity,
+            ProcessAuditEventEntity,
+            ProcessEventOutboxEntity,
+          ],
           migrations: [`${__dirname}/migrations/*.js`],
           migrationsRun: true,
           synchronize: false,

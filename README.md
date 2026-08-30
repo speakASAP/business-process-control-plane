@@ -1,7 +1,7 @@
 # Business Process Control Plane
 
-Business Process Control Plane, or BPCP, is an Alfares ecosystem service for
-dynamic business processes.
+Business Process Control Plane (BPCP) is an Alfares ecosystem service for
+managing dynamic business-process lifecycle state.
 
 It provides:
 
@@ -12,25 +12,23 @@ It provides:
 - service capability registry;
 - simulation endpoint;
 - publication lifecycle;
-- local process event outbox;
+- durable process event outbox;
 - RabbitMQ topic transport adapter for process events;
 - audit-ready metadata;
-- fail-closed contracts for affected services.
+- fail-closed mutation contracts.
 
 ## Current state
 
-This service has a JSON-backed local process registry for code validation and
-typed in-memory policy/workflow registries for the Holiday Discount pilot.
-Lifecycle transitions also append `bpcp.process-event.v1` envelopes to a local
-JSON outbox so publication can be validated before the production event bus is
-approved. A disabled-by-default RabbitMQ adapter can dispatch pending outbox
-events to the `bpcp.events` topic exchange with versioned routing keys such as
-`bpcp.process.published.v1`.
+Process registry runtime persistence, process audit history, and process event
+outbox persistence are now PostgreSQL-backed through TypeORM entities and
+migrations. Workflow instances remain PostgreSQL-backed.
 
-The JSON process store is not the final production persistence decision; it
-exists so process lifecycle, validation, audit, editor, policy/workflow, and
-simulation flows can be developed without waiting for Kubernetes or database
-wiring.
+Policy/workflow definition registries remain in-memory/seed-driven for the
+Holiday Discount pilot. RabbitMQ dispatch remains env-gated and can replay
+already dispatched outbox events with bounded filters.
+
+Sensitive process and outbox mutation endpoints require bearer-token identity
+validation via `AUTH_SERVICE_URL`; `/health` remains public.
 
 ## Local commands
 
@@ -43,6 +41,7 @@ npm run verify:event-transport
 npm run verify:deployment-wiring
 npm run verify:policy-workflow
 npm run verify:editor
+npm run verify:instances
 npm run build
 npm run verify:simulation
 npm test
@@ -56,22 +55,23 @@ Default port: `3375`
 Useful endpoints:
 
 ```text
-GET  /health
+GET  /health                                 (public)
 GET  /editor
 GET  /api/processes
-POST /api/processes
+POST /api/processes                          (auth required)
 GET  /api/processes/store/info
 GET  /api/processes/:processId/audit
 GET  /api/processes/:processId/versions/:version
 GET  /api/processes/:processId/versions/:version/audit
-POST /api/processes/:processId/versions/:version/validate
-POST /api/processes/:processId/versions/:version/schedule
-POST /api/processes/:processId/versions/:version/publish
-POST /api/processes/:processId/versions/:version/pause
-POST /api/processes/:processId/versions/:version/retire
+POST /api/processes/:processId/versions/:version/validate   (auth required)
+POST /api/processes/:processId/versions/:version/schedule   (auth required)
+POST /api/processes/:processId/versions/:version/publish    (auth required)
+POST /api/processes/:processId/versions/:version/pause      (auth required)
+POST /api/processes/:processId/versions/:version/retire     (auth required)
 GET  /api/events/outbox
 GET  /api/events/outbox/info
-POST /api/events/outbox/dispatch
+POST /api/events/outbox/dispatch             (auth required)
+POST /api/events/outbox/replay               (auth required)
 GET  /api/events/outbox/:processId
 GET  /api/events/transport/info
 GET  /api/policies
@@ -86,9 +86,14 @@ POST /api/simulate
 
 ## Boundaries
 
-BPCP coordinates business process versions. It does not directly mutate
-domain-service databases and does not own monetary finality.
+BPCP coordinates versioned process lifecycle and publication contracts. It does
+not directly mutate domain-service databases and does not own monetary
+finality.
 
 ## Deployment
 
-Kubernetes deployment wiring exists under `k8s/` with ConfigMap, ExternalSecret, PVC, Deployment, and Service manifests. `scripts/deploy.sh` validates, builds, pushes, applies manifests, waits for rollout, and checks `/health` plus `/api/events/transport/info`. No ingress is included yet; public editor/domain approval remains pending. JSON persistence is backed by a PVC for initial deployment, while the final database/HA persistence decision remains pending.
+Kubernetes deployment wiring exists under `k8s/` with ConfigMap,
+ExternalSecret, Deployment, and Service manifests. `scripts/deploy.sh`
+delegates to shared deployment automation and verifies rollout plus health.
+
+No ingress is included yet; public editor/domain approval remains pending.
