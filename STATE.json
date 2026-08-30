@@ -1,22 +1,29 @@
 {
-  "schemaVersion": 1,
-  "project": "business-process-control-plane",
-  "lifecycle": "active",
-  "health": "healthy",
-  "activeTask": "None; last task TASK-BPCP-REVIEW-FIXES-2026-08-30 is done, pending owner decisions on open blockers",
-  "lastUpdated": "2026-08-30",
-  "deployment": {
-    "status": "commit-triggered-auto-queue",
-    "image": null,
-    "revision": null
+  "schema_version": "1.0",
+  "repository": "business-process-control-plane",
+  "service": {
+    "name": "business-process-control-plane",
+    "kind": "orchestrator",
+    "lifecycle": "active",
+    "deployment": "kubernetes"
   },
-  "blockers": [
-    "Exact Auth RBAC roles for BPCP mutation scopes are not yet defined (identity-only guard remains by design).",
-    "Downstream BPCP event consumers and replay/backfill ownership are not yet defined.",
-    "Public process-editor ingress/domain approval is pending.",
-    "The authoritative pricing/cart owner contract referenced by workflow definitions is not yet defined."
-  ],
-  "followUps": [
-    "IPS adoption profile completed 2026-08-30; run the planning validator before further scope changes"
-  ]
+  "planning": {
+    "status": "blocked",
+    "active_goal_ids": [],
+    "next_ready_goal_ids": [],
+    "blocked_goal_ids": [],
+    "active_workstream_ids": [],
+    "last_updated_at": "2026-08-30T00:00:00Z"
+  },
+  "delivery": {
+    "last_validation_id": null,
+    "last_validation_status": null,
+    "validation_debt_count": 0,
+    "last_deployment_commit": null
+  },
+  "collection": {
+    "profile": "minimal",
+    "artifact_index": "docs/registry/ARTIFACT_INDEX.json",
+    "status_source": "wave-1-contract-remediation"
+  }
 }

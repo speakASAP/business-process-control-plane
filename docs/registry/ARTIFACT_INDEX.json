@@ -25,9 +25,9 @@
     }
   ],
   "warnings": [
+    "[MISSING: 2026-08-30 orchestrator context/prompt/validation documents are collectable but not indexed as first-class artifacts because they do not declare stable artifact IDs.]",
     "[MISSING: BUSINESS.md, SYSTEM.md, and AGENT_OPERATIONS.md are absent at repository root; profile remains minimal until those documents exist.]",
     "[UNKNOWN: RunLayer project/task identifiers are not documented in this repository; runlayer_project_slug and runlayer_task_id remain null.]",
-    "[MISSING: 2026-08-30 orchestrator context/prompt/validation documents are collectable but not indexed as first-class artifacts because they do not declare stable artifact IDs.]",
     "[UNKNOWN: docs/orchestrator/STATUS.md reports broader integration as in progress while indexed task artifacts report completed source slices; task statuses above follow task-level evidence only.]"
   ]
 }
