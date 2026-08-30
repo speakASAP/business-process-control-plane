@@ -1,0 +1,49 @@
+{
+  "schema_version": "1.0",
+  "repository": "business-process-control-plane",
+  "profile": "minimal",
+  "project_registration": {
+    "runlayer_project_slug": null,
+    "runlayer_permalink": null,
+    "status": "unlinked",
+    "warning": "[UNKNOWN: RunLayer project slug/permalink is not documented in tracked business-process-control-plane artifacts.]"
+  },
+  "collectable_paths": [
+    "AGENTS.md",
+    "TASKS.md",
+    "STATE.json",
+    "docs/INTENT_PRESERVATION_README.md",
+    "docs/business-process-control-plane/README.md",
+    "docs/specs/2026-08-22-bpcp-workflow-executor-design.md",
+    "docs/superpowers/plans/2026-08-22-bpcp-workflow-executor.md",
+    "docs/orchestrator/STATUS.md",
+    "docs/orchestrator/2026-08-30-bpcp-durable-control-plane-context-package.md",
+    "docs/orchestrator/2026-08-30-bpcp-durable-control-plane-execution-plan.md",
+    "docs/orchestrator/2026-08-30-bpcp-durable-control-plane-coding-prompt.md",
+    "docs/orchestrator/2026-08-30-bpcp-durable-control-plane-validation-report.md",
+    "docs/orchestrator/2026-08-30-bpcp-review-fixes-validation-report.md",
+    "docs/orchestrator/2026-08-30-planning-standardization-pilot-validation-report.md",
+    "docs/registry/REPOSITORY_PROFILE.json",
+    "docs/registry/ARTIFACT_INDEX.json"
+  ],
+  "excluded_path_patterns": [
+    ".env",
+    ".env.*",
+    "**/secrets/**",
+    "**/*.pem",
+    "**/node_modules/**",
+    "**/coverage/**",
+    "**/src/**",
+    "**/dist/**",
+    "**/k8s/**",
+    "**/scripts/**",
+    "**/process-registry/**"
+  ],
+  "owners": {
+    "business_intent": "human",
+    "technical_system": "service-owner",
+    "planning_state": "repository-orchestrator",
+    "integration": "service-owner",
+    "registry_contract": "repository-orchestrator"
+  }
+}
