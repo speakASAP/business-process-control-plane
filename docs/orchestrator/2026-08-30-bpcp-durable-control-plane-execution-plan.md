@@ -1,7 +1,7 @@
 # BPCP Durable Control Plane Execution Plan
 
 Date: 2026-08-30
-Status: complete in source, commit pending
+Status: complete and pushed to main
 Task ID: `TASK-BPCP-DURABLE-CONTROL-PLANE-SLICE-001`
 
 ## Intent Preservation Chain

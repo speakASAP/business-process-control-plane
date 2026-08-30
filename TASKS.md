@@ -12,7 +12,7 @@ Implement the first approved durable-control-plane slice in `business-process-co
 - [x] Update deployment/config/docs/verifiers for DB-backed persistence and auth boundary.
 - [x] Add focused tests for repository, auth guard/client, and outbox idempotency contracts.
 - [x] Run targeted validation commands and build.
-- [ ] Commit and push to `main` with required co-author trailer.
+- [x] Commit and push to `main` with required co-author trailer.
 
 ## Blockers
 - [MISSING: exact Auth RBAC roles for BPCP mutation scopes] (identity-only auth guard implemented without inventing roles).

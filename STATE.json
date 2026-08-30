@@ -1,9 +1,9 @@
 {
-  "updatedAt": "2026-08-30T20:25:30+02:00",
+  "updatedAt": "2026-08-30T20:26:30+02:00",
   "taskId": "TASK-BPCP-DURABLE-CONTROL-PLANE-SLICE-001",
   "goal": "Durable process registry and outbox persistence with authenticated mutation boundary",
-  "status": "in_progress",
-  "phase": "commit_pending",
+  "status": "done",
+  "phase": "complete",
   "activeDocument": "docs/orchestrator/2026-08-30-bpcp-durable-control-plane-validation-report.md",
   "blockers": [
     "[MISSING: exact Auth RBAC roles for BPCP mutation scopes]"

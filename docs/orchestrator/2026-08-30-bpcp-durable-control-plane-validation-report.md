@@ -2,7 +2,7 @@
 
 Date: 2026-08-30
 Task ID: `TASK-BPCP-DURABLE-CONTROL-PLANE-SLICE-001`
-Status: source validation complete
+Status: source validation complete, changes committed and pushed
 
 ## Commands and results
 
