@@ -1,105 +1,61 @@
 # Business Process Control Plane
 
-Business Process Control Plane (BPCP) is an Alfares ecosystem service for
-managing dynamic business-process lifecycle state.
+## status
 
-It provides:
+Business Process Control Plane (BPCP) is an active Alfares ecosystem service managing dynamic business-process lifecycle state: process/policy/workflow registries, a visual process editor, simulation, publication lifecycle, and a durable process event outbox.
 
-- process registry;
-- policy registry;
-- workflow registry;
-- visual process editor;
-- service capability registry;
-- simulation endpoint;
-- publication lifecycle;
-- durable process event outbox;
-- RabbitMQ topic transport adapter for process events;
-- audit-ready metadata;
-- fail-closed mutation contracts.
+## documentation authority
 
-## Current state
+- `AGENTS.md` for repository intent and current blockers
+- `README.md` for runtime endpoints and current implementation state
+- `docs/01_vision/VISION.md` for durable product direction
+- `docs/orchestrator/` for dated review/fix task records
 
-Process registry runtime persistence, process audit history, and process event
-outbox persistence are now PostgreSQL-backed through TypeORM entities and
-migrations. Workflow instances remain PostgreSQL-backed.
+## capabilities
 
-Policy/workflow definition registries remain in-memory/seed-driven for the
-Holiday Discount pilot. RabbitMQ dispatch remains env-gated and can replay
-already dispatched outbox events with bounded filters.
+- Process registry with versioned lifecycle (validate, schedule, publish, pause, retire) and audit history
+- Policy registry and workflow registry (in-memory/seed-driven for the Holiday Discount pilot)
+- Visual process editor (`GET /editor`)
+- Service capability registry describing known ecosystem service capabilities for workflow definitions to reference
+- Simulation endpoint (`POST /api/simulate`)
+- Durable process event outbox with bounded dispatch/replay (`limit` query param, default 100, clamped 1..500)
+- RabbitMQ topic transport adapter for process events (env-gated)
+- Audit-ready metadata and fail-closed mutation contracts
 
-Sensitive process and outbox mutation endpoints require bearer-token identity
-validation via `AUTH_SERVICE_URL` using `POST /auth/validate` by default
-(`AUTH_VALIDATION_PATH` and `AUTH_VALIDATION_METHOD` remain overrideable);
-`/health` remains public.
+## interfaces
 
-## Local commands
+- `GET /health` (public)
+- `GET /editor`, `GET /api/processes`, `POST /api/processes` (auth required)
+- `GET /api/processes/:processId/audit`, `.../versions/:version`, `.../versions/:version/audit`
+- `POST /api/processes/:processId/versions/:version/{validate,schedule,publish,pause,retire}` (auth required)
+- `GET /api/events/outbox`, `/outbox/info`, `/outbox/:processId`, `POST /outbox/dispatch`, `/outbox/replay` (auth required)
+- `GET /api/events/transport/info`
+- `GET /api/policies`, `/api/workflows`, `/api/capabilities`, `POST /api/simulate`
 
-```bash
-npm install
-npm run verify:contracts
-npm run verify:process-registry
-npm run verify:event-publication
-npm run verify:event-transport
-npm run verify:deployment-wiring
-npm run verify:policy-workflow
-npm run verify:editor
-npm run verify:instances
-npm run build
-npm run verify:simulation
-npm test
-npm run start:dev
-```
+## development
 
-## Runtime
+- Stack: NestJS, TypeScript, TypeORM, PostgreSQL
+- Local run: `npm install`, `npm run start:dev`
+- Verification scripts: `npm run verify:contracts`, `verify:process-registry`, `verify:event-publication`, `verify:event-transport`, `verify:deployment-wiring`, `verify:policy-workflow`, `verify:editor`, `verify:instances`, `verify:simulation`
+- Tests: `npm test`; build: `npm run build`
 
-Default port: `3375`
+## configuration
 
-Useful endpoints:
+- Default port: 3375
+- `BPCP_DATABASE_URL` is required; the service refuses to start without a configured PostgreSQL connection
+- `AUTH_SERVICE_URL`, `AUTH_VALIDATION_PATH` (default `/auth/validate`), `AUTH_VALIDATION_METHOD` (default `POST`), `AUTH_VALIDATION_TIMEOUT_MS`
+- `LOGGING_SERVICE_URL`, `MONITORING_SERVICE_URL`
+- `BPCP_EVENT_BUS_ENABLED` (env-gated, default false), `BPCP_EVENT_BUS_URL`/`RABBITMQ_URL`, `BPCP_EVENTS_EXCHANGE`, `BPCP_EVENTS_ROUTING_KEY_PREFIX`
+- `BPCP_PROCESS_SIGNING_SECRET` is Vault-managed
 
-```text
-GET  /health                                 (public)
-GET  /editor
-GET  /api/processes
-POST /api/processes                          (auth required)
-GET  /api/processes/store/info
-GET  /api/processes/:processId/audit
-GET  /api/processes/:processId/versions/:version
-GET  /api/processes/:processId/versions/:version/audit
-POST /api/processes/:processId/versions/:version/validate   (auth required)
-POST /api/processes/:processId/versions/:version/schedule   (auth required)
-POST /api/processes/:processId/versions/:version/publish    (auth required)
-POST /api/processes/:processId/versions/:version/pause      (auth required)
-POST /api/processes/:processId/versions/:version/retire     (auth required)
-GET  /api/events/outbox
-GET  /api/events/outbox/info
-POST /api/events/outbox/dispatch             (auth required)
-POST /api/events/outbox/replay               (auth required)
-GET  /api/events/outbox/:processId
-GET  /api/events/transport/info
+## deployment
 
-Outbox dispatch/replay use optional `limit` query params with integer-only
-validation, default `100`, and bounded runtime clamp `1..500`.
+- Deploy command: `./scripts/deploy.sh`, delegating to shared deployment automation and verifying rollout + health
+- Kubernetes manifests under `k8s/`: ConfigMap, ExternalSecret, Deployment, Service (no Ingress yet; public editor/domain approval pending)
+- Target namespace: `statex-apps`
 
-GET  /api/policies
-GET  /api/policies/:policyId/versions/:version
-POST /api/policies/:policyId/versions/:version/validate
-GET  /api/workflows
-GET  /api/workflows/:workflowId/versions/:version
-POST /api/workflows/:workflowId/versions/:version/validate
-GET  /api/capabilities
-POST /api/simulate
-```
+## health and observability
 
-## Boundaries
-
-BPCP coordinates versioned process lifecycle and publication contracts. It does
-not directly mutate domain-service databases and does not own monetary
-finality.
-
-## Deployment
-
-Kubernetes deployment wiring exists under `k8s/` with ConfigMap,
-ExternalSecret, Deployment, and Service manifests. `scripts/deploy.sh`
-delegates to shared deployment automation and verifies rollout plus health.
-
-No ingress is included yet; public editor/domain approval remains pending.
+- Health endpoint: `GET /health` (public, no auth required)
+- Structured logging via `logging-microservice` (`LOGGING_SERVICE_URL`)
+- Monitoring via `monitoring-microservice` (`MONITORING_SERVICE_URL`)

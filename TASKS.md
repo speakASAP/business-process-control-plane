@@ -1,17 +1,23 @@
-# TASKS — BPCP Verified Review Fixes (2026-08-30)
+# Tasks: Business Process Control Plane
 
-## Goal
-Apply only the two verified BPCP review fixes in remote `main`: auth validation contract alignment and outbox dispatch/replay `limit` hardening.
+This file is the concise human-readable work queue. Detailed task contracts live under `docs/11_tasks/` and execution records remain linked there.
 
-## Work items
-- [x] Read current auth validation, outbox dispatch/replay controller/service flow, and related tests before changes.
-- [x] Update auth validation defaults from `GET /api/auth/validate` to `POST /auth/validate` while preserving fail-closed behavior.
-- [x] Align environment and Kubernetes wiring defaults with the validated auth contract.
-- [x] Add/adjust focused auth tests for the new default contract.
-- [x] Validate/coerce `limit` safely at events controller boundary for dispatch/replay and add defensive bounded-limit fallback.
-- [x] Add focused tests ensuring malformed `limit` is controlled and non-finite values cannot reach TypeORM limits.
-- [x] Run targeted tests, relevant verification scripts, build, and `git diff --check`.
-- [x] Record validation evidence and update state artifacts.
+## active
 
-## Blockers
-- [MISSING: exact Auth RBAC roles for BPCP mutation scopes] (identity-only guard remains by design)
+- None in progress; the most recent task (TASK-BPCP-REVIEW-FIXES-2026-08-30) is done per STATE.json.
+
+## ready next
+
+- Resolve the four open blockers in AGENTS.md (downstream event consumers/replay ownership, Auth RBAC roles, editor ingress/domain, pricing/cart owner contract) once the owner provides direction.
+
+## blocked
+
+- Exact Auth RBAC roles for BPCP mutation scopes are not yet defined; identity-only guard remains by design until resolved.
+
+## completed
+
+- 2026-08-30 TASK-BPCP-REVIEW-FIXES-2026-08-30: auth validation contract alignment (POST /auth/validate default) and outbox dispatch/replay limit hardening, with focused tests and validation evidence recorded in docs/orchestrator/2026-08-30-bpcp-review-fixes-validation-report.md.
+
+## handoff
+
+Current machine-readable state: [`STATE.json`](STATE.json). See `docs/orchestrator/2026-08-30-bpcp-review-fixes-validation-report.md` for the latest validation evidence and AGENTS.md for open blockers.

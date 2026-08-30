@@ -1,0 +1,157 @@
+{
+  "schemaVersion": 1,
+  "profile": "runtime-service",
+  "project": {
+    "name": "business-process-control-plane",
+    "repository": "https://github.com/speakASAP/business-process-control-plane.git"
+  },
+  "standard": {
+    "repository": "https://github.com/speakASAP/intent-preservation-system",
+    "revision": "3e36f64c11e31b878fd2fe09267426738b25ae7f"
+  },
+  "artifacts": {
+    "readme": "README.md",
+    "business": "BUSINESS.md",
+    "system": "SYSTEM.md",
+    "agents": "AGENTS.md",
+    "operations": "AGENT_OPERATIONS.md",
+    "claude": "CLAUDE.md",
+    "tasks": "TASKS.md",
+    "state": "STATE.json",
+    "constitution": "docs/00_constitution/CONSTITUTION.md",
+    "vision": "docs/01_vision/VISION.md",
+    "integrationContract": "docs/06_architecture/INTEGRATION_CONTRACT.md",
+    "projectInvariants": "docs/17_governance/PROJECT_INVARIANTS.md",
+    "validationDebt": "docs/orchestrator/VALIDATION_DEBT.md",
+    "bootstrapTask": "docs/11_tasks/TASK-001-bootstrap-service.md",
+    "bootstrapGoalImpact": "docs/22_goal_impact/GOAL-IMPACT-TASK-001.md",
+    "bootstrapExecutionPlan": "docs/21_execution_plans/EP-TASK-001-bootstrap-service.md",
+    "bootstrapValidation": "docs/12_validation/VAL-TASK-001-bootstrap-service.md"
+  },
+  "integrationReview": [
+    {
+      "capability": "auth",
+      "component": "auth-microservice",
+      "decision": "required",
+      "reason": "README.md and .env.example document AUTH_SERVICE_URL with a POST /auth/validate default contract, enforced on all sensitive process and outbox mutation endpoints (fail-closed).",
+      "contract": "Bearer-token identity validation via POST /auth/validate (path/method configurable)",
+      "configuration": "AUTH_SERVICE_URL, AUTH_VALIDATION_PATH, AUTH_VALIDATION_METHOD, AUTH_VALIDATION_TIMEOUT_MS",
+      "failureMode": "Mutation endpoints fail closed (reject) when auth-microservice is unreachable or validation fails; GET /health remains public and unaffected.",
+      "validation": "Focused auth contract tests (per TASKS.md 2026-08-30 review fixes) and verify:deployment-wiring."
+    },
+    {
+      "capability": "postgres",
+      "component": "database-server (db-server-postgres)",
+      "decision": "required",
+      "reason": ".env.example documents BPCP_DATABASE_URL as required, with README.md stating the service refuses to start without it; process registry, audit history, event outbox, and workflow instances are TypeORM-persisted.",
+      "contract": "TypeORM entities and migrations for process registry, audit history, event outbox, and workflow instances",
+      "configuration": "BPCP_DATABASE_URL",
+      "failureMode": "The service refuses to start without a configured database connection; there is no degraded in-memory fallback for persisted entities.",
+      "validation": "verify:process-registry and verify:instances verification scripts; npm test."
+    },
+    {
+      "capability": "redis",
+      "component": "database-server (db-server-redis)",
+      "decision": "not-applicable",
+      "reason": "No Redis client, environment variable, or documented usage exists anywhere in this repository."
+    },
+    {
+      "capability": "logging",
+      "component": "logging-microservice",
+      "decision": "required",
+      "reason": ".env.example documents LOGGING_SERVICE_URL for structured logging.",
+      "contract": "Structured log delivery per the platform logging contract",
+      "configuration": "LOGGING_SERVICE_URL",
+      "failureMode": "Logging outage degrades observability without blocking mutation or query endpoints.",
+      "validation": "Structured log delivery checks."
+    },
+    {
+      "capability": "notifications",
+      "component": "notifications-microservice",
+      "decision": "not-applicable",
+      "reason": "BPCP explicitly does not own notification delivery channels (AGENTS.md, README.md Boundaries). notifications-microservice is registered only as a known service capability (e.g. template-ref-delivery) in BPCP's capability/workflow registries for workflow definitions to reference, not called directly by BPCP itself."
+    },
+    {
+      "capability": "ai",
+      "component": "ai-microservice",
+      "decision": "not-applicable",
+      "reason": "No AI-microservice integration is documented or referenced anywhere in this repository's code, .env.example, or docs."
+    },
+    {
+      "capability": "payments",
+      "component": "payments-microservice",
+      "decision": "not-applicable",
+      "reason": "BPCP explicitly does not own monetary finality or payment capture (README.md Boundaries, AGENTS.md Intent)."
+    },
+    {
+      "capability": "catalog",
+      "component": "catalog-microservice",
+      "decision": "not-applicable",
+      "reason": "BPCP explicitly does not own product catalog data (AGENTS.md Intent, README.md Boundaries)."
+    },
+    {
+      "capability": "orders",
+      "component": "orders-microservice",
+      "decision": "not-applicable",
+      "reason": "BPCP coordinates process/workflow lifecycle, not order processing; no orders-microservice integration is documented or referenced."
+    },
+    {
+      "capability": "warehouse",
+      "component": "warehouse-microservice",
+      "decision": "not-applicable",
+      "reason": "BPCP has no physical inventory or warehouse concern."
+    },
+    {
+      "capability": "invoices",
+      "component": "invoices-microservice",
+      "decision": "not-applicable",
+      "reason": "BPCP explicitly does not own invoice legal totals (README.md Boundaries); it does not integrate with invoices-microservice directly."
+    },
+    {
+      "capability": "object-storage",
+      "component": "minio-microservice",
+      "decision": "not-applicable",
+      "reason": "No object-storage usage was found in this repository's code, .env.example, or docs."
+    },
+    {
+      "capability": "event-bus",
+      "component": "RabbitMQ",
+      "decision": "required",
+      "reason": "README.md, .env.example, and AGENTS.md document an approved RabbitMQ topic transport adapter for process events (exchange bpcp.events, routing prefix bpcp.process), currently env-gated by BPCP_EVENT_BUS_ENABLED and off by default.",
+      "contract": "Durable process event outbox dispatched over a RabbitMQ topic transport adapter when enabled",
+      "configuration": "BPCP_EVENT_BUS_ENABLED, BPCP_EVENT_BUS_URL/RABBITMQ_URL, BPCP_EVENTS_EXCHANGE, BPCP_EVENTS_ROUTING_KEY_PREFIX, BPCP_EVENT_BUS_PUBLISH_TIMEOUT_MS",
+      "failureMode": "When the event bus is disabled or unreachable, events remain durably queued in the PostgreSQL-backed outbox for later bounded dispatch/replay rather than being lost.",
+      "validation": "verify:event-publication and verify:event-transport verification scripts."
+    },
+    {
+      "capability": "docs-rag",
+      "component": "docs-rag-microservice",
+      "decision": "required",
+      "reason": "This runtime service must remain discoverable through the ecosystem documentation index, consistent with every other runtime-service repository's adoption profile.",
+      "contract": "Direct Git repository ingestion and repository-scoped retrieval",
+      "configuration": "Tracked in the canonical repository registry and docs-RAG index",
+      "failureMode": "When docs-RAG is unavailable, Git remains authoritative.",
+      "validation": "Repository documents resolve to the owning repository path and remain discoverable."
+    },
+    {
+      "capability": "monitoring",
+      "component": "monitoring-microservice",
+      "decision": "required",
+      "reason": ".env.example documents MONITORING_SERVICE_URL, and runtime health/rollout readiness must be observable through the shared monitoring stack.",
+      "contract": "GET /health and Kubernetes readiness checks for rollout control",
+      "configuration": "MONITORING_SERVICE_URL and deployment probes in k8s manifests",
+      "failureMode": "An unhealthy service is prevented from passing rollout readiness and is reported to the owner.",
+      "validation": "The monitoring stack confirms health, readiness, and service availability."
+    },
+    {
+      "capability": "backups",
+      "component": "backups-microservice",
+      "decision": "required",
+      "reason": "The service persists process registry, audit history, event outbox, and workflow instance data durably in PostgreSQL via BPCP_DATABASE_URL, which requires backup coverage consistent with other ecosystem databases.",
+      "contract": "Scheduled/manual PostgreSQL backups for the BPCP database",
+      "configuration": "backup-db.sh or equivalent invoked against the BPCP PostgreSQL database",
+      "failureMode": "Missed backups increase data-loss risk on failure; this must be flagged as an operational blocker if backup automation lapses.",
+      "validation": "Backup script execution and restore-drill evidence."
+    }
+  ]
+}
