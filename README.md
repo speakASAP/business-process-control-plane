@@ -28,7 +28,9 @@ Holiday Discount pilot. RabbitMQ dispatch remains env-gated and can replay
 already dispatched outbox events with bounded filters.
 
 Sensitive process and outbox mutation endpoints require bearer-token identity
-validation via `AUTH_SERVICE_URL`; `/health` remains public.
+validation via `AUTH_SERVICE_URL` using `POST /auth/validate` by default
+(`AUTH_VALIDATION_PATH` and `AUTH_VALIDATION_METHOD` remain overrideable);
+`/health` remains public.
 
 ## Local commands
 
@@ -74,6 +76,10 @@ POST /api/events/outbox/dispatch             (auth required)
 POST /api/events/outbox/replay               (auth required)
 GET  /api/events/outbox/:processId
 GET  /api/events/transport/info
+
+Outbox dispatch/replay use optional `limit` query params with integer-only
+validation, default `100`, and bounded runtime clamp `1..500`.
+
 GET  /api/policies
 GET  /api/policies/:policyId/versions/:version
 POST /api/policies/:policyId/versions/:version/validate

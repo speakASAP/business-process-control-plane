@@ -1,18 +1,17 @@
-# TASKS — BPCP Durable Control Plane Slice (2026-08-30)
+# TASKS — BPCP Verified Review Fixes (2026-08-30)
 
 ## Goal
-Implement the first approved durable-control-plane slice in `business-process-control-plane` by replacing file/PVC-backed process-registry and process-event-outbox runtime persistence with PostgreSQL/TypeORM, preserving existing public API contracts and immutable audit/history semantics.
+Apply only the two verified BPCP review fixes in remote `main`: auth validation contract alignment and outbox dispatch/replay `limit` hardening.
 
 ## Work items
-- [x] Create local planning artifacts (task/goal, execution plan, context package, coding prompt, validation report, STATE/TASKS/orchestrator state).
-- [x] Add process-registry and outbox TypeORM entities plus migration.
-- [x] Implement process-registry and outbox repository services with durable/idempotent behavior.
-- [x] Refactor process/event services/controllers to use database persistence and preserve API shape.
-- [x] Add authenticated boundary for sensitive mutation endpoints using `AUTH_SERVICE_URL` fail-closed validation.
-- [x] Update deployment/config/docs/verifiers for DB-backed persistence and auth boundary.
-- [x] Add focused tests for repository, auth guard/client, and outbox idempotency contracts.
-- [x] Run targeted validation commands and build.
-- [x] Commit and push to `main` with required co-author trailer.
+- [x] Read current auth validation, outbox dispatch/replay controller/service flow, and related tests before changes.
+- [x] Update auth validation defaults from `GET /api/auth/validate` to `POST /auth/validate` while preserving fail-closed behavior.
+- [x] Align environment and Kubernetes wiring defaults with the validated auth contract.
+- [x] Add/adjust focused auth tests for the new default contract.
+- [x] Validate/coerce `limit` safely at events controller boundary for dispatch/replay and add defensive bounded-limit fallback.
+- [x] Add focused tests ensuring malformed `limit` is controlled and non-finite values cannot reach TypeORM limits.
+- [x] Run targeted tests, relevant verification scripts, build, and `git diff --check`.
+- [x] Record validation evidence and update state artifacts.
 
 ## Blockers
-- [MISSING: exact Auth RBAC roles for BPCP mutation scopes] (identity-only auth guard implemented without inventing roles).
+- [MISSING: exact Auth RBAC roles for BPCP mutation scopes] (identity-only guard remains by design)

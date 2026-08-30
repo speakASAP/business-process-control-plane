@@ -14,6 +14,7 @@ const EVENT_TRANSPORT = 'local-json-outbox';
 const EVENT_BUS_MISSING =
   '[MISSING: RabbitMQ dispatch not attempted; use POST /api/events/outbox/dispatch after transport config is approved]';
 const OUTBOX_TABLE = 'bpcp_process_event_outbox';
+const DEFAULT_DISPATCH_LIMIT = 100;
 
 interface PublishProcessEventInput {
   type: ProcessEventType;
@@ -96,7 +97,7 @@ export class EventPublisherService {
     return this.transport.getTransportInfo();
   }
 
-  async dispatchPending(limit = 100): Promise<ProcessEventDispatchSummary> {
+  async dispatchPending(limit = DEFAULT_DISPATCH_LIMIT): Promise<ProcessEventDispatchSummary> {
     const boundedLimit = this.boundedLimit(limit);
     const transportInfo = this.transport.getTransportInfo();
 
@@ -123,7 +124,7 @@ export class EventPublisherService {
     eventType?: ProcessEventType;
   } = {}): Promise<ProcessEventDispatchSummary> {
     const candidates = await this.outboxRepository.listDispatchedForReplay({
-      limit: this.boundedLimit(input.limit ?? 100),
+      limit: this.boundedLimit(input.limit ?? DEFAULT_DISPATCH_LIMIT),
       processId: input.processId,
       eventType: input.eventType,
     });
@@ -181,7 +182,11 @@ export class EventPublisherService {
   }
 
   private boundedLimit(limit: number): number {
-    return Math.max(1, Math.min(limit, 500));
+    if (!Number.isFinite(limit)) {
+      return DEFAULT_DISPATCH_LIMIT;
+    }
+
+    return Math.max(1, Math.min(Math.trunc(limit), 500));
   }
 
   private skippedResult(event: ProcessEventEnvelope, blockers: string[]): ProcessEventDispatchResult {

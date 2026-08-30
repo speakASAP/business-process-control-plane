@@ -16,15 +16,16 @@ describe('AuthValidationClient', () => {
     expect(global.fetch).toBe(originalFetch);
   });
 
-  it('returns identity from a successful validation payload', async () => {
-    (global as Record<string, unknown>).fetch = jest.fn(async () => ({
+  it('uses POST /auth/validate by default and returns identity from successful validation payload', async () => {
+    const fetchMock = jest.fn(async () => ({
       ok: true,
       status: 200,
       json: async () => ({
         valid: true,
         user: { id: 'user-123', email: 'owner@example.com' },
       }),
-    })) as unknown;
+    }));
+    (global as Record<string, unknown>).fetch = fetchMock as unknown;
 
     const client = new AuthValidationClient(
       config({
@@ -36,6 +37,14 @@ describe('AuthValidationClient', () => {
       subject: 'user-123',
       actor: 'owner@example.com',
     });
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      'http://auth-microservice:3370/auth/validate',
+      expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify({ token: 'token-1' }),
+      }),
+    );
   });
 
   it('returns null when auth service rejects the token', async () => {

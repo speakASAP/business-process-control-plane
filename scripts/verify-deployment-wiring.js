@@ -37,8 +37,8 @@ const packageJson = JSON.parse(read('package.json'));
 
 const checks = [
   [configmap, 'AUTH_SERVICE_URL: "http://auth-microservice.statex-apps.svc.cluster.local:3370"'],
-  [configmap, 'AUTH_VALIDATION_PATH: "/api/auth/validate"'],
-  [configmap, 'AUTH_VALIDATION_METHOD: "GET"'],
+  [configmap, 'AUTH_VALIDATION_PATH: "/auth/validate"'],
+  [configmap, 'AUTH_VALIDATION_METHOD: "POST"'],
   [configmap, 'BPCP_EVENT_BUS_ENABLED: "true"'],
   [configmap, 'BPCP_EVENTS_EXCHANGE: "bpcp.events"'],
   [configmap, 'BPCP_EVENTS_ROUTING_KEY_PREFIX: "bpcp.process"'],

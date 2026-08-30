@@ -37,6 +37,12 @@ describe('EventPublisherService', () => {
     expect(outboxRepository.claimUndispatched).not.toHaveBeenCalled();
   });
 
+  it('falls back to the default dispatch limit when a non-finite value reaches the service', async () => {
+    await service.dispatchPending(Number.NaN);
+
+    expect(outboxRepository.listUndispatched).toHaveBeenCalledWith(100);
+  });
+
   it('updates durable delivery state for successful and failed dispatch attempts', async () => {
     transport.getTransportInfo.mockReturnValue(transportInfo(true));
 
@@ -94,6 +100,14 @@ describe('EventPublisherService', () => {
     expect(summary.attempted).toBe(1);
     expect(summary.dispatched).toBe(1);
     expect(outboxRepository.applyDispatchResult).not.toHaveBeenCalled();
+  });
+
+  it('falls back to the default replay limit when a non-finite value reaches the service', async () => {
+    await service.replayDispatched({ limit: Number.NaN });
+
+    expect(outboxRepository.listDispatchedForReplay).toHaveBeenCalledWith(
+      expect.objectContaining({ limit: 100 }),
+    );
   });
 
   function transportInfo(ready: boolean): ProcessEventTransportInfo {

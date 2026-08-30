@@ -55,12 +55,15 @@ Dispatch/replay behavior:
 - dispatch claims undispatched rows with `FOR UPDATE SKIP LOCKED` and stale-claim recovery;
 - successful dispatch marks rows `dispatched` with immutable event ids;
 - failed dispatch marks rows `failed` with error context;
-- replay re-publishes already dispatched envelopes with stable `messageId=event.id`.
+- replay re-publishes already dispatched envelopes with stable `messageId=event.id`;
+- `limit` query values must be integer strings and are clamped to `1..500` with default `100`.
 
 ## Auth boundary
 
 Sensitive process lifecycle and outbox mutation endpoints validate bearer tokens
-against `AUTH_SERVICE_URL` using a minimal fail-closed validation client/guard.
+against `AUTH_SERVICE_URL` using a minimal fail-closed validation client/guard
+(default contract `POST /auth/validate`, configurable via
+`AUTH_VALIDATION_PATH`/`AUTH_VALIDATION_METHOD`).
 No RBAC role assumptions are invented in this slice; unresolved role mapping
 remains a blocker.
 

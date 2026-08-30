@@ -2,10 +2,11 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AuthenticatedIdentity } from './auth.types';
 
-const DEFAULT_AUTH_VALIDATION_PATH = '/api/auth/validate';
+const DEFAULT_AUTH_VALIDATION_PATH = '/auth/validate';
 const DEFAULT_AUTH_VALIDATION_TIMEOUT_MS = 3000;
 const SUPPORTED_AUTH_VALIDATE_METHODS = ['GET', 'POST'] as const;
 type AuthValidateMethod = (typeof SUPPORTED_AUTH_VALIDATE_METHODS)[number];
+const DEFAULT_AUTH_VALIDATION_METHOD: AuthValidateMethod = 'POST';
 
 @Injectable()
 export class AuthValidationClient {
@@ -74,10 +75,13 @@ export class AuthValidationClient {
 
   private validationMethod(): AuthValidateMethod {
     const method = this.config.get<string>('AUTH_VALIDATION_METHOD')?.trim().toUpperCase();
+    if (method === 'GET') {
+      return 'GET';
+    }
     if (method === 'POST') {
       return 'POST';
     }
-    return 'GET';
+    return DEFAULT_AUTH_VALIDATION_METHOD;
   }
 
   private validationTimeoutMs(): number {

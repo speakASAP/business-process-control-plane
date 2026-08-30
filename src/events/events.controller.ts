@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
+import { BadRequestException, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { AuthIdentityGuard } from '../auth/auth-identity.guard';
 import { EventPublisherService } from './event-publisher.service';
 import { ProcessEventType } from './process-event.types';
@@ -20,7 +20,7 @@ export class EventsController {
   @Post('outbox/dispatch')
   @UseGuards(AuthIdentityGuard)
   async dispatchOutbox(@Query('limit') limit?: string) {
-    return this.eventPublisher.dispatchPending(limit ? Number.parseInt(limit, 10) : undefined);
+    return this.eventPublisher.dispatchPending(this.parseLimit(limit));
   }
 
   @Post('outbox/replay')
@@ -31,7 +31,7 @@ export class EventsController {
     @Query('eventType') eventType?: ProcessEventType,
   ) {
     return this.eventPublisher.replayDispatched({
-      limit: limit ? Number.parseInt(limit, 10) : undefined,
+      limit: this.parseLimit(limit),
       processId,
       eventType,
     });
@@ -45,5 +45,18 @@ export class EventsController {
   @Get('transport/info')
   getTransportInfo() {
     return this.eventPublisher.getTransportInfo();
+  }
+
+  private parseLimit(limit?: string): number | undefined {
+    if (limit === undefined) {
+      return undefined;
+    }
+
+    const normalized = limit.trim();
+    if (!/^-?\d+$/.test(normalized)) {
+      throw new BadRequestException('Query parameter "limit" must be an integer.');
+    }
+
+    return Number.parseInt(normalized, 10);
   }
 }

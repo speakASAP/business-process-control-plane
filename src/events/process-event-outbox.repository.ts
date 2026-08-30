@@ -298,6 +298,10 @@ export class ProcessEventOutboxRepository {
   }
 
   private boundLimit(limit: number): number {
-    return Math.max(1, Math.min(limit, 500));
+    if (!Number.isFinite(limit)) {
+      return 100;
+    }
+
+    return Math.max(1, Math.min(Math.trunc(limit), 500));
   }
 }

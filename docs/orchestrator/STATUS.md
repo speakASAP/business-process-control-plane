@@ -1,7 +1,7 @@
 # BPCP Orchestrator Status
 
 Date: 2026-08-30
-Status: durable-control-plane slice implemented in source; awaiting automated deploy and runtime verification
+Status: durable-control-plane slice and verified auth/outbox review fixes implemented in source; awaiting automated deploy and runtime verification
 
 ## Current scope
 
@@ -11,6 +11,8 @@ Status: durable-control-plane slice implemented in source; awaiting automated de
 - Durable/idempotent outbox dispatch claim/update behavior.
 - Outbox replay endpoint with stable event ids and bounded filters.
 - Authenticated fail-closed guards on sensitive process/outbox mutation endpoints.
+- Auth validation defaults aligned with production auth contract (`POST /auth/validate`).
+- Outbox dispatch/replay malformed `limit` now fails with controlled client validation, with defensive bounded limit fallback.
 - Workflow instance runtime persistence remains PostgreSQL-backed.
 - Policy/workflow registries, simulation, editor, and capability registry retained.
 - Kubernetes wiring updated for DB-backed runtime store (no process-registry/outbox PVC dependency).
@@ -23,7 +25,8 @@ Status: durable-control-plane slice implemented in source; awaiting automated de
 | Durable outbox persistence and idempotent dispatch/replay | main orchestrator | complete in source | `npm run verify:event-publication` |
 | Authenticated mutation boundary | main orchestrator | complete in source | focused auth/unit tests + `npm run verify:contracts` |
 | Deployment wiring update for DB-backed runtime store | main orchestrator | complete in source | `npm run verify:deployment-wiring` |
-| Integration and validation | main orchestrator | in progress | validation report for this slice |
+| Verified review fixes (auth contract + outbox limit hardening) | main orchestrator | complete in source | targeted unit tests + `npm run build` + `git diff --check` |
+| Integration and validation | main orchestrator | in progress | validation reports for active slices |
 
 ## Blockers
 
@@ -38,6 +41,7 @@ Status: durable-control-plane slice implemented in source; awaiting automated de
 See:
 
 - `docs/orchestrator/2026-08-30-bpcp-durable-control-plane-validation-report.md`
+- `docs/orchestrator/2026-08-30-bpcp-review-fixes-validation-report.md`
 
 ## Related artifacts
 
@@ -45,5 +49,6 @@ See:
 - `docs/orchestrator/2026-08-30-bpcp-durable-control-plane-execution-plan.md`
 - `docs/orchestrator/2026-08-30-bpcp-durable-control-plane-coding-prompt.md`
 - `docs/orchestrator/2026-08-30-bpcp-durable-control-plane-validation-report.md`
+- `docs/orchestrator/2026-08-30-bpcp-review-fixes-validation-report.md`
 
 Historical deployment/runtime evidence remains in dated `docs/orchestrator/*.md` files.
