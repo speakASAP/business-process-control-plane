@@ -6,3 +6,14 @@ data/
 .env.local
 npm-debug.log*
 reports/validation/*.tmp
+
+# Secret-blocking baseline (required by shared pre-commit hook)
+k8s/secret.yaml
+secrets/
+keys/
+*.pem
+*.key
+*private*
+*backup*
+*bck*
+*.bak*
