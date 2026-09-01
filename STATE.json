@@ -25,23 +25,5 @@
     "profile": "minimal",
     "artifact_index": "docs/registry/ARTIFACT_INDEX.json",
     "status_source": "wave-1-contract-remediation"
-  },
-  "schemaVersion": 1,
-  "project": "business-process-control-plane",
-  "lifecycle": "active",
-  "health": "blocked",
-  "activeTask": "wave-1-contract-remediation",
-  "lastUpdated": "2026-08-30T00:00:00Z",
-  "deployment": {
-    "status": "kubernetes"
-  },
-  "blockers": [
-    "Auth RBAC roles for BPCP mutation scopes are undefined.",
-    "Downstream event consumer/replay ownership is undefined.",
-    "Process-editor ingress/domain assignment is pending.",
-    "Pricing/cart owner contract is undefined."
-  ],
-  "followUps": [
-    "Reconcile STATE.json schema between the IPS-required top-level keys and this repository's native schema_version/service/planning/delivery/collection structure."
-  ]
+  }
 }
