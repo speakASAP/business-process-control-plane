@@ -1,8 +1,10 @@
 ---
-status: review
+status: done
 owner: repository-owner
-last_updated: 2026-08-31
+last_updated: 2026-09-02
 ---
+
+<!-- done: executor, persistence, HTTP surface, timeout handling, verification, and Kubernetes wiring implemented across 2f870fe through 4d9c1f3; focused tests, verification gates, and build pass. -->
 
 # BPCP Workflow Executor Implementation Plan
 
@@ -76,14 +78,14 @@ Boundaries: the repository owns transactions and locking, the dispatcher owns "r
 - Consumes: nothing (first task)
 - Produces: `WorkflowInstanceEntity`, `InstanceStepEntity`, `InstanceSignalEntity`; type unions `InstanceStatus = 'running' | 'waiting' | 'completed' | 'failed' | 'cancelled'`, `StepStatus = 'pending' | 'running' | 'succeeded' | 'failed' | 'skipped'`; `DatabaseModule`
 
-- [ ] **Step 1: Install dependencies**
+- [x] **Step 1: Install dependencies**
 
 ```bash
 cd /home/ssf/Documents/Github/business-process-control-plane
 npm install --save @nestjs/typeorm@^10.0.0 typeorm@^0.3.17 pg@^8.11.3 @nestjs/schedule@^4.0.0
 ```
 
-- [ ] **Step 2: Write the domain types**
+- [x] **Step 2: Write the domain types**
 
 Create `src/instances/instance.types.ts`:
 
@@ -111,7 +113,7 @@ export interface WaitDescriptor {
 }
 ```
 
-- [ ] **Step 3: Write the entities**
+- [x] **Step 3: Write the entities**
 
 Create `src/instances/entities/workflow-instance.entity.ts`:
 
@@ -227,7 +229,7 @@ export class InstanceSignalEntity {
 }
 ```
 
-- [ ] **Step 4: Write the migration**
+- [x] **Step 4: Write the migration**
 
 Create `src/database/migrations/1756000000000-CreateInstanceTables.ts`:
 
@@ -296,7 +298,7 @@ export class CreateInstanceTables1756000000000 implements MigrationInterface {
 }
 ```
 
-- [ ] **Step 5: Write the database module**
+- [x] **Step 5: Write the database module**
 
 Create `src/database/database.module.ts`:
 
@@ -334,7 +336,7 @@ import { WorkflowInstanceEntity } from '../instances/entities/workflow-instance.
 export class DatabaseModule {}
 ```
 
-- [ ] **Step 6: Wire into app.module.ts**
+- [x] **Step 6: Wire into app.module.ts**
 
 In `src/app.module.ts`, add the import and list `DatabaseModule` first in `imports` (after `ConfigModule.forRoot`):
 
@@ -342,7 +344,7 @@ In `src/app.module.ts`, add the import and list `DatabaseModule` first in `impor
 import { DatabaseModule } from './database/database.module';
 ```
 
-- [ ] **Step 7: Document the new env var**
+- [x] **Step 7: Document the new env var**
 
 Append to `.env.example`:
 
@@ -351,7 +353,7 @@ Append to `.env.example`:
 BPCP_DATABASE_URL=postgresql://bpcp:CHANGEME@localhost:5432/bpcp
 ```
 
-- [ ] **Step 8: Verify the build and that the registry did not regress**
+- [x] **Step 8: Verify the build and that the registry did not regress**
 
 ```bash
 npm run build
@@ -360,7 +362,7 @@ npm test
 
 Expected: build succeeds; all eight `verify:*` scripts still pass.
 
-- [ ] **Step 9: Commit**
+- [x] **Step 9: Commit**
 
 ```bash
 git add package.json package-lock.json src/database src/instances .env.example src/app.module.ts
@@ -388,7 +390,7 @@ The JSON store loses concurrent updates. This task is where that is fixed, so it
   `withLockedInstance<T>(instanceId: string, fn: (instance, manager) => Promise<T>): Promise<T>`,
   `findExpiredWaits(now: Date): Promise<WorkflowInstanceEntity[]>`
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Create `src/instances/instance-repository.service.spec.ts`. These are integration tests against a real Postgres — the lost-update bug is invisible against a mock.
 
@@ -513,7 +515,7 @@ describeDb('InstanceRepositoryService', () => {
 });
 ```
 
-- [ ] **Step 2: Run the tests to verify they fail**
+- [x] **Step 2: Run the tests to verify they fail**
 
 ```bash
 export BPCP_TEST_DATABASE_URL=postgresql://postgres:postgres@localhost:5433/bpcp_test
@@ -525,7 +527,7 @@ Expected: FAIL — `Cannot find module './instance-repository.service'`.
 
 Note: `docker run` creates a container, so take the deploy lock first if any deploy may be in flight — `../shared/scripts/with-deploy-lock.sh --status`.
 
-- [ ] **Step 3: Implement the repository**
+- [x] **Step 3: Implement the repository**
 
 Create `src/instances/instance-repository.service.ts`:
 
@@ -670,7 +672,7 @@ export class InstanceNotFoundError extends Error {
 }
 ```
 
-- [ ] **Step 4: Run the tests to verify they pass**
+- [x] **Step 4: Run the tests to verify they pass**
 
 ```bash
 ./node_modules/.bin/jest src/instances/instance-repository.service.spec.ts
@@ -678,11 +680,11 @@ export class InstanceNotFoundError extends Error {
 
 Expected: PASS, all five.
 
-- [ ] **Step 5: Confirm the race test actually catches the bug**
+- [x] **Step 5: Confirm the race test actually catches the bug**
 
 Temporarily change `lock: { mode: 'pessimistic_write' }` to `lock: undefined` and re-run. The race test MUST fail with `counter` equal to 1. Restore the lock afterwards. A green test that cannot go red is worthless.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/instances/instance-repository.service.ts src/instances/instance-repository.service.spec.ts
@@ -701,7 +703,7 @@ git commit -m "feat: instance repository with row-level locking"
 - Consumes: nothing
 - Produces: `'wait-for-signal'` in `KNOWN_WORKFLOW_ACTION_TYPES`; `WaitForSignalParameters`; type guard `isWaitForSignalAction(action: WorkflowActionDefinition): boolean`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `src/workflows/workflow-wait-action.spec.ts`:
 
@@ -745,7 +747,7 @@ describe('wait-for-signal action', () => {
 });
 ```
 
-- [ ] **Step 2: Run the test to verify it fails**
+- [x] **Step 2: Run the test to verify it fails**
 
 ```bash
 ./node_modules/.bin/jest src/workflows/workflow-wait-action.spec.ts
@@ -753,7 +755,7 @@ describe('wait-for-signal action', () => {
 
 Expected: FAIL — `isWaitForSignalAction is not a function`.
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 In `src/workflows/workflow.types.ts`, add `'wait-for-signal'` to `KNOWN_WORKFLOW_ACTION_TYPES` and append:
 
@@ -785,7 +787,7 @@ export function readWaitParameters(action: WorkflowActionDefinition): WaitForSig
 }
 ```
 
-- [ ] **Step 4: Run the tests to verify they pass**
+- [x] **Step 4: Run the tests to verify they pass**
 
 ```bash
 ./node_modules/.bin/jest src/workflows/workflow-wait-action.spec.ts
@@ -794,7 +796,7 @@ npm test
 
 Expected: new tests PASS; all eight `verify:*` scripts still pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/workflows/workflow.types.ts src/workflows/workflow-wait-action.spec.ts
@@ -813,7 +815,7 @@ git commit -m "feat: add wait-for-signal workflow action type"
 - Consumes: `InstanceError` (Task 1); `WorkflowActionDefinition` (existing)
 - Produces: `ActionDispatcherService.execute(action, context): Promise<ActionResult>` where `ActionResult = { ok: true; output: Record<string, unknown> } | { ok: false; error: InstanceError }`; constant `MAX_ATTEMPTS = 3`
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Create `src/instances/action-dispatcher.service.spec.ts`:
 
@@ -889,7 +891,7 @@ describe('ActionDispatcherService', () => {
 });
 ```
 
-- [ ] **Step 2: Run the tests to verify they fail**
+- [x] **Step 2: Run the tests to verify they fail**
 
 ```bash
 ./node_modules/.bin/jest src/instances/action-dispatcher.service.spec.ts
@@ -897,7 +899,7 @@ describe('ActionDispatcherService', () => {
 
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 Create `src/instances/action-dispatcher.service.ts`:
 
@@ -965,7 +967,7 @@ export class ActionDispatcherService {
 }
 ```
 
-- [ ] **Step 4: Run the tests to verify they pass**
+- [x] **Step 4: Run the tests to verify they pass**
 
 ```bash
 ./node_modules/.bin/jest src/instances/action-dispatcher.service.spec.ts
@@ -973,7 +975,7 @@ export class ActionDispatcherService {
 
 Expected: PASS, all five.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/instances/action-dispatcher.service.ts src/instances/action-dispatcher.service.spec.ts
@@ -992,7 +994,7 @@ git commit -m "feat: action dispatcher with transient/permanent failure classifi
 - Consumes: `InstanceRepositoryService` (2), `readWaitParameters` / `isWaitForSignalAction` (3), `ActionDispatcherService` (4), `WorkflowRegistryService` (existing)
 - Produces: `WorkflowExecutorService.advance(instanceId: string): Promise<WorkflowInstanceEntity>`, `.start(input: CreateInstanceInput & { workflowId, workflowVersion, correlationKey }): Promise<WorkflowInstanceEntity>`, `.deliverSignal(instanceId, name, payload): Promise<WorkflowInstanceEntity>`
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Create `src/instances/workflow-executor.service.spec.ts`:
 
@@ -1112,7 +1114,7 @@ describe('WorkflowExecutorService', () => {
 });
 ```
 
-- [ ] **Step 2: Run the tests to verify they fail**
+- [x] **Step 2: Run the tests to verify they fail**
 
 ```bash
 ./node_modules/.bin/jest src/instances/workflow-executor.service.spec.ts
@@ -1120,7 +1122,7 @@ describe('WorkflowExecutorService', () => {
 
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Add `updateStep` to the repository**
+- [x] **Step 3: Add `updateStep` to the repository**
 
 In `src/instances/instance-repository.service.ts`:
 
@@ -1136,7 +1138,7 @@ In `src/instances/instance-repository.service.ts`:
   }
 ```
 
-- [ ] **Step 4: Implement the executor**
+- [x] **Step 4: Implement the executor**
 
 Create `src/instances/workflow-executor.service.ts`:
 
@@ -1306,7 +1308,7 @@ export class WorkflowExecutorService {
 }
 ```
 
-- [ ] **Step 5: Run the tests to verify they pass**
+- [x] **Step 5: Run the tests to verify they pass**
 
 ```bash
 ./node_modules/.bin/jest src/instances/workflow-executor.service.spec.ts
@@ -1314,7 +1316,7 @@ export class WorkflowExecutorService {
 
 Expected: PASS, all six.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/instances/workflow-executor.service.ts src/instances/workflow-executor.service.spec.ts src/instances/instance-repository.service.ts
@@ -1334,7 +1336,7 @@ git commit -m "feat: DAG walker with wait-for-signal halt and resume"
 - Consumes: `InstanceRepositoryService.findExpiredWaits` (2), `WorkflowExecutorService` (5)
 - Produces: `InstanceTimeoutService.sweep(now?: Date): Promise<{ examined: number; failed: number; continued: number }>`
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Create `src/instances/instance-timeout.service.spec.ts`:
 
@@ -1385,7 +1387,7 @@ describe('InstanceTimeoutService', () => {
 });
 ```
 
-- [ ] **Step 2: Run the tests to verify they fail**
+- [x] **Step 2: Run the tests to verify they fail**
 
 ```bash
 ./node_modules/.bin/jest src/instances/instance-timeout.service.spec.ts
@@ -1393,7 +1395,7 @@ describe('InstanceTimeoutService', () => {
 
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Add `failWaitTimeout` to the repository**
+- [x] **Step 3: Add `failWaitTimeout` to the repository**
 
 In `src/instances/instance-repository.service.ts`:
 
@@ -1413,7 +1415,7 @@ In `src/instances/instance-repository.service.ts`:
   }
 ```
 
-- [ ] **Step 4: Implement the sweep**
+- [x] **Step 4: Implement the sweep**
 
 Create `src/instances/instance-timeout.service.ts`:
 
@@ -1469,7 +1471,7 @@ export class InstanceTimeoutService {
 }
 ```
 
-- [ ] **Step 5: Add the `@Cron` monkey-patch to main.ts**
+- [x] **Step 5: Add the `@Cron` monkey-patch to main.ts**
 
 `@Cron` silently never fires on Node v22+/v24 without this. At the very top of `src/main.ts`, **before any other import**:
 
@@ -1484,7 +1486,7 @@ if (typeof reflectAny.getMetadata !== 'function') {
 }
 ```
 
-- [ ] **Step 6: Run the tests to verify they pass**
+- [x] **Step 6: Run the tests to verify they pass**
 
 ```bash
 ./node_modules/.bin/jest src/instances/instance-timeout.service.spec.ts
@@ -1492,7 +1494,7 @@ if (typeof reflectAny.getMetadata !== 'function') {
 
 Expected: PASS, all three.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add src/instances/instance-timeout.service.ts src/instances/instance-timeout.service.spec.ts src/instances/instance-repository.service.ts src/main.ts
@@ -1513,7 +1515,7 @@ git commit -m "feat: timeout sweep for expired waits"
 - Consumes: `WorkflowExecutorService` (5), `InstanceRepositoryService` (2)
 - Produces: `POST /api/instances`, `GET /api/instances/:id`, `GET /api/instances`, `POST /api/instances/:id/signals`, `POST /api/instances/:id/cancel`, `GET /api/instances/:id/audit`
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Create `src/instances/instance.controller.spec.ts`:
 
@@ -1564,7 +1566,7 @@ describe('InstanceController', () => {
 });
 ```
 
-- [ ] **Step 2: Run the tests to verify they fail**
+- [x] **Step 2: Run the tests to verify they fail**
 
 ```bash
 ./node_modules/.bin/jest src/instances/instance.controller.spec.ts
@@ -1572,7 +1574,7 @@ describe('InstanceController', () => {
 
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Write the DTOs**
+- [x] **Step 3: Write the DTOs**
 
 Create `src/instances/dto/create-instance.dto.ts`:
 
@@ -1614,7 +1616,7 @@ export class DeliverSignalDto {
 }
 ```
 
-- [ ] **Step 4: Implement the controller**
+- [x] **Step 4: Implement the controller**
 
 Create `src/instances/instance.controller.ts`:
 
@@ -1680,7 +1682,7 @@ export class InstanceController {
 }
 ```
 
-- [ ] **Step 5: Add `cancel` to the repository**
+- [x] **Step 5: Add `cancel` to the repository**
 
 ```ts
   async cancel(instanceId: string): Promise<WorkflowInstanceEntity> {
@@ -1694,7 +1696,7 @@ export class InstanceController {
   }
 ```
 
-- [ ] **Step 6: Wire the module**
+- [x] **Step 6: Wire the module**
 
 Create `src/instances/instances.module.ts`:
 
@@ -1729,7 +1731,7 @@ export class InstancesModule {}
 
 Add `InstancesModule` to the `imports` array in `src/app.module.ts`.
 
-- [ ] **Step 7: Run the tests to verify they pass**
+- [x] **Step 7: Run the tests to verify they pass**
 
 ```bash
 ./node_modules/.bin/jest src/instances/instance.controller.spec.ts
@@ -1738,7 +1740,7 @@ npm run build
 
 Expected: PASS, all five; build succeeds.
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add src/instances src/app.module.ts
@@ -1757,7 +1759,7 @@ git commit -m "feat: instance HTTP API and module wiring"
 - Consumes: existing `ProcessEventEnvelope`, `EventPublisherService`
 - Produces: `InstanceEventType`; routing keys `bpcp.instance.<type>.v1`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `src/instances/instance-events.spec.ts`:
 
@@ -1781,7 +1783,7 @@ describe('instance events', () => {
 });
 ```
 
-- [ ] **Step 2: Run the test to verify it fails**
+- [x] **Step 2: Run the test to verify it fails**
 
 ```bash
 ./node_modules/.bin/jest src/instances/instance-events.spec.ts
@@ -1789,7 +1791,7 @@ describe('instance events', () => {
 
 Expected: FAIL — `INSTANCE_EVENT_TYPES` is not exported.
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 Append to `src/events/process-event.types.ts`:
 
@@ -1809,7 +1811,7 @@ export function instanceRoutingKey(type: InstanceEventType): string {
 }
 ```
 
-- [ ] **Step 4: Run the tests to verify they pass**
+- [x] **Step 4: Run the tests to verify they pass**
 
 ```bash
 ./node_modules/.bin/jest src/instances/instance-events.spec.ts
@@ -1818,7 +1820,7 @@ npm test
 
 Expected: PASS; all eight `verify:*` scripts still pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/events/process-event.types.ts src/instances/instance-events.spec.ts
@@ -1839,7 +1841,7 @@ git commit -m "feat: instance lifecycle event types and routing keys"
 - Consumes: all prior files
 - Produces: `npm run verify:instances`; `npm test` runs Jest
 
-- [ ] **Step 1: Write the structural verify script**
+- [x] **Step 1: Write the structural verify script**
 
 Create `scripts/verify-instances.js`, matching the house style of `verify-policy-workflow.js`:
 
@@ -1896,7 +1898,7 @@ if (failures.length > 0) {
 console.log('verify:instances PASSED');
 ```
 
-- [ ] **Step 2: Run it to verify it passes**
+- [x] **Step 2: Run it to verify it passes**
 
 ```bash
 node scripts/verify-instances.js
@@ -1904,7 +1906,7 @@ node scripts/verify-instances.js
 
 Expected: `verify:instances PASSED`.
 
-- [ ] **Step 3: Confirm it can fail**
+- [x] **Step 3: Confirm it can fail**
 
 ```bash
 mv src/instances/instances.module.ts /tmp/ && node scripts/verify-instances.js; mv /tmp/instances.module.ts src/instances/
@@ -1912,7 +1914,7 @@ mv src/instances/instances.module.ts /tmp/ && node scripts/verify-instances.js; 
 
 Expected: exits non-zero naming the missing file. Restore it.
 
-- [ ] **Step 4: Wire both into package.json**
+- [x] **Step 4: Wire both into package.json**
 
 In `package.json` `scripts`, add `verify:instances` and put Jest into `test`:
 
@@ -1922,7 +1924,7 @@ In `package.json` `scripts`, add `verify:instances` and put Jest into `test`:
     "test": "npm run verify:contracts && npm run verify:process-registry && npm run verify:event-publication && npm run verify:event-transport && npm run verify:deployment-wiring && npm run verify:policy-workflow && npm run verify:editor && npm run verify:instances && npm run build && npm run verify:simulation && npm run test:unit"
 ```
 
-- [ ] **Step 5: Run the full suite**
+- [x] **Step 5: Run the full suite**
 
 ```bash
 export BPCP_TEST_DATABASE_URL=postgresql://postgres:postgres@localhost:5433/bpcp_test
@@ -1931,7 +1933,7 @@ npm test
 
 Expected: nine `verify:*` scripts pass, build succeeds, Jest suite passes.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add scripts/verify-instances.js package.json
