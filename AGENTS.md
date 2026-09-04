@@ -40,6 +40,7 @@ This is the binding requirement for planning, coding, and validation work.
 - BPCP does not own product catalog data, final price calculation, payment capture, invoice legal totals, or notification delivery channels — do not add these responsibilities without explicit approval
 - RabbitMQ event producer wiring is approved using the URL from `secret/prod/runlayer`, exchange `bpcp.events`, routing prefix `bpcp.process`; do not change this wiring without explicit approval
 - Mark unresolved facts as `[MISSING: ...]` or `[UNKNOWN: ...]`, matching the existing blockers already recorded in AGENTS.md
+- The four blockers previously listed here (Auth RBAC roles, event consumer/replay ownership, editor ingress/domain, pricing/cart owner contract) were resolved/owner-accepted-as-deferred on 2026-09-04; see `docs/orchestrator/2026-09-04-bpcp-remaining-blockers-owner-decision.md` and `TASKS.md` for current status before assuming any of them are still open
 
 ## required final report
 
